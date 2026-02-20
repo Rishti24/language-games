@@ -1,1 +1,1 @@
-# language-games
+# Manifesto
