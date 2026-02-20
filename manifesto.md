@@ -1,5 +1,6 @@
 **Manifesto**
 
+
 I imagine an AI that keeps talking past the ending.
 It stays with the sentence a little longer than it should.
 Stopping feels too certain.
