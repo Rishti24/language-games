@@ -72,8 +72,13 @@
 
     /* Selected Experiments */
     .samples{display:grid; grid-template-columns:repeat(4,1fr); gap:20px}
-    figure.sample-figure{background:#fff; padding:18px; border-radius:12px; box-shadow:var(--soft-shadow); display:flex; flex-direction:column; align-items:stretch}
-    .sample-visual{height:120px; border-radius:8px; background:linear-gradient(135deg,#efe9ff,#fff1ec); box-shadow:inset 0 -10px 24px rgba(0,0,0,0.04)}
+    figure.sample-figure{background:#fff; padding:18px; border-radius:12px; box-shadow:var(--soft-shadow); display:flex; flex-direction:column; align-items:stretch; opacity:0; transform:translateY(10px); transition:opacity .7s ease, transform .7s ease}
+    figure.sample-figure.visible{opacity:1; transform:translateY(0)}
+    .sample-visual{height:120px; border-radius:8px; overflow:hidden; background:linear-gradient(135deg,#efe9ff,#fff1ec); box-shadow:inset 0 -10px 24px rgba(0,0,0,0.04); display:block}
+    .sample-figure img, .sample-figure svg{width:100%;height:100%;object-fit:cover;display:block;border-radius:6px;transform:translateY(6px);transition:transform .6s cubic-bezier(.2,.8,.2,1),box-shadow .4s;box-shadow:0 6px 20px rgba(12,18,30,0.06)}
+    .sample-figure img:hover, .sample-figure svg:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 18px 40px rgba(12,18,30,0.12)}
+    @keyframes floaty{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
+    .sample-figure img.float, .sample-figure svg .float{animation:floaty 6s ease-in-out infinite}
     figcaption{margin-top:12px; font-size:13px; color:hsl(220 10% 36%)}
 
     footer{padding:40px 0; color:hsl(220 10% 50%); font-size:14px}
@@ -105,9 +110,10 @@
       </div>
       <div style="width:260px; align-self:flex-start">
         <div class="card">
-          <strong>Quick Interaction</strong>
-          <p style="margin:10px 0 14px;color:hsl(220 10% 45%);">Move your pointer across the page to nudge the background’s luminous fields and reveal material depth.</p>
-          <div style="display:flex;gap:8px;align-items:center"><div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(180deg,#6b8cff,#8ad4ff);box-shadow:0 6px 18px rgba(106,139,255,0.18)"></div><div style="font-size:13px;color:hsl(220 10% 40%)">Tactile field</div></div>
+          <strong>Field Controls</strong>
+          <p style="margin:10px 0 12px;color:hsl(220 10% 45%);">Tune the luminous field and motion to explore interactive behaviors. The changes affect background intensity and animation speed.</p>
+          <label style="display:block;font-size:13px;color:hsl(220 10% 40%);margin-bottom:8px">Intensity <input id="intensityRange" type="range" min="0" max="2" step="0.01" value="1" style="width:100%"></label>
+          <label style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13px"><input id="motionToggle" type="checkbox" checked> Enable motion</label>
         </div>
       </div>
     </header>
@@ -163,20 +169,54 @@
       <h2>Selected Experiments</h2>
       <div class="samples">
         <figure class="sample-figure">
-          <div class="sample-visual" style="background:linear-gradient(135deg,#f3f0ff,#fffaf0);display:flex;align-items:center;justify-content:center">Sample A</div>
-          <figcaption>Layered polymer + matte glaze — soft resilience</figcaption>
+          <div class="sample-visual">
+            <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#efe9ff"/><stop offset="1" stop-color="#fff1ec"/></linearGradient>
+              </defs>
+              <rect width="200" height="120" fill="url(#g1)" rx="8"/>
+              <g>
+                <circle class="float" cx="50" cy="70" r="22" fill="#b8d0ff" opacity="0.95"/>
+                <circle cx="130" cy="40" r="30" fill="#ffdfe6" opacity="0.9"/>
+              </g>
+            </svg>
+          </div>
+          <figcaption>Animated field studies — layered glow</figcaption>
         </figure>
         <figure class="sample-figure">
-          <div class="sample-visual" style="background:linear-gradient(135deg,#fff7f3,#f2f9ff);display:flex;align-items:center;justify-content:center">Sample B</div>
-          <figcaption>Woven textile — directional friction</figcaption>
+          <div class="sample-visual">
+            <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <rect width="200" height="120" fill="#fffaf0" rx="8"/>
+              <g>
+                <ellipse class="float" cx="60" cy="50" rx="36" ry="18" fill="#eaf6ff" opacity="0.95"/>
+                <rect x="120" y="30" width="60" height="50" rx="10" fill="#f3f0ff" opacity="0.9"/>
+              </g>
+            </svg>
+          </div>
+          <figcaption>Soft topology — directional texture</figcaption>
         </figure>
         <figure class="sample-figure">
-          <div class="sample-visual" style="background:linear-gradient(135deg,#f7fff6,#eef6ff);display:flex;align-items:center;justify-content:center">Sample C</div>
-          <figcaption>Pressed clay — warm thermal profile</figcaption>
+          <div class="sample-visual">
+            <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <rect width="200" height="120" fill="#f7fff6" rx="8"/>
+              <g>
+                <path class="float" d="M30 80 q40 -60 80 0 q40 -60 80 0" fill="none" stroke="#d7f0ff" stroke-width="10" stroke-linecap="round" opacity="0.9"/>
+              </g>
+            </svg>
+          </div>
+          <figcaption>Contour interactions — warm gradients</figcaption>
         </figure>
         <figure class="sample-figure">
-          <div class="sample-visual" style="background:linear-gradient(135deg,#fff8f2,#f0f3ff);display:flex;align-items:center;justify-content:center">Sample D</div>
-          <figcaption>Paper composite — layered grain</figcaption>
+          <div class="sample-visual">
+            <svg viewBox="0 0 200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <rect width="200" height="120" fill="#fff8f2" rx="8"/>
+              <g>
+                <circle class="float" cx="100" cy="60" r="28" fill="#f0f3ff" opacity="0.92"/>
+                <circle cx="150" cy="30" r="10" fill="#fff1ec" opacity="0.95"/>
+              </g>
+            </svg>
+          </div>
+          <figcaption>Layered nodes — composite grain</figcaption>
         </figure>
       </div>
     </section>
@@ -227,6 +267,55 @@
         document.querySelector('.bg-layer').style.transform = '';
         onScroll();
       });
+    })();
+  </script>
+  <script>
+    // reveal sample cards when they enter the viewport with a slight stagger
+    (function(){
+      const cards = Array.from(document.querySelectorAll('figure.sample-figure'));
+      if(!cards.length) return;
+      const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            const idx = cards.indexOf(entry.target);
+            setTimeout(()=> entry.target.classList.add('visible'), idx * 90);
+            obs.unobserve(entry.target);
+          }
+        });
+      }, {threshold: 0.18});
+      cards.forEach(c => io.observe(c));
+    })();
+  </script>
+  <script>
+    // UI: intensity slider + motion toggle
+    (function(){
+      const intensity = document.getElementById('intensityRange');
+      const motion = document.getElementById('motionToggle');
+      const bg = document.querySelector('.bg-layer');
+      function applyIntensity(v){
+        bg.style.opacity = String(0.9 * v);
+        // speed up or slow drift animation
+        const base = 18; // seconds
+        const dur = Math.max(6, base / Math.max(0.3, v));
+        bg.style.animationDuration = dur + 's';
+      }
+      intensity.addEventListener('input', (e)=> applyIntensity(parseFloat(e.target.value)));
+      motion.addEventListener('change', (e)=>{
+        if(!e.target.checked){ bg.style.animationPlayState = 'paused'; }
+        else { bg.style.animationPlayState = 'running'; }
+      });
+      applyIntensity(parseFloat(intensity.value));
+
+      // add subtle pointer orbit for SVG floats
+      document.addEventListener('mousemove', (ev)=>{
+        const svgs = document.querySelectorAll('.sample-visual svg .float');
+        svgs.forEach((el,i)=>{
+          const rect = el.ownerSVGElement.getBoundingClientRect();
+          const dx = (ev.clientX - (rect.left + rect.width/2)) * (0.002 + i*0.0005);
+          const dy = (ev.clientY - (rect.top + rect.height/2)) * (0.002 + i*0.0005);
+          el.style.transform = `translate(${dx}px,${dy}px)`;
+        });
+      }, {passive:true});
     })();
   </script>
 </body>
