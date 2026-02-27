@@ -65,7 +65,7 @@
     <section class="hero">
       <div style="display:flex;gap:12px;align-items:center">
         <span style="width:44px;height:6px;border-radius:6px;background:linear-gradient(90deg,#ffd3a5,#a18cd1);display:inline-block"></span>
-        <h1 class="title">It continues, slightly unfinished.</h1>
+        <h1 id="main-title" class="title" tabindex="0" role="button">It continues, slightly unfinished.</h1>
       </div>
       <p class="sub">A simple, looping interface — a space that keeps a small gap open.</p>
       <p style="margin:.6rem 0 0 0;color:#6b7280;font-size:13px;opacity:.95">An experimental palette, intentionally incomplete — click any frame to explore an in-progress thought.</p>
@@ -168,6 +168,17 @@
     .tag.colored{background:linear-gradient(90deg,#ffd3a5,#ff9a9e);color:#1f2937;border:none}
     .tag.colored:nth-child(2){background:linear-gradient(90deg,#a18cd1,#c7a3e6)}
     .tag.colored:nth-child(3){background:linear-gradient(90deg,#a7f3d0,#60a5fa)}
+
+    /* interaction panel (camera / mic) */
+    .interact{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1600}
+    .interact-backdrop{position:absolute;inset:0;background:rgba(6,10,24,0.44);backdrop-filter:blur(4px)}
+    .interact-card{position:relative;width:min(560px,92vw);background:#fff;border-radius:12px;padding:18px;border:1px solid rgba(8,16,36,0.06);box-shadow:0 18px 60px rgba(8,16,36,0.12)}
+    .interact h4{margin:0 0 8px 0}
+    .interact .btn{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid rgba(8,16,36,0.06);background:linear-gradient(90deg,#fff,#fff0);cursor:pointer;margin-right:8px}
+    .interact .hint{font-size:13px;color:#6b7280;margin-top:8px}
+
+    /* blended user snapshot behind the page */
+    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(16px) saturate(120%);opacity:0;mix-blend-mode:overlay;transition:opacity .42s ease}
   </style>
   <script>
     // tiny theme nudge: shift background colors slowly for variety
@@ -223,6 +234,81 @@
       cta.style.color = '#0f172a';
       cta.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:2200,iterations:Infinity});
       cta.addEventListener('click', ()=>{ const first = document.querySelector('.tile'); if(first) first.click(); });
+    })();
+
+    // interaction panel: camera snapshot + mic-reactive demo
+    (function(){
+      const title = document.getElementById('main-title');
+      const interact = document.createElement('div');
+      interact.className = 'interact'; interact.hidden = true; interact.setAttribute('aria-hidden','true');
+      interact.innerHTML = `
+        <div class="interact-backdrop" data-close></div>
+        <div class="interact-card" role="dialog" aria-modal="true">
+          <h4>Try an interaction</h4>
+          <div><button id="use-camera" class="btn">Use camera (snapshot)</button><button id="use-mic" class="btn">Use microphone (reactive)</button><button data-close class="btn">Close</button></div>
+          <div class="hint">Permissions are requested locally. Media stays in your browser unless you choose to export.</div>
+        </div>
+      `;
+      document.body.appendChild(interact);
+
+      const useCamera = interact.querySelector('#use-camera');
+      const useMic = interact.querySelector('#use-mic');
+
+      function openInteract(){ interact.hidden = false; interact.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }
+      function closeInteract(){ interact.hidden = true; interact.setAttribute('aria-hidden','true'); document.body.style.overflow=''; stopMic(); }
+
+      title.addEventListener('click', openInteract);
+      title.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' ') openInteract(); });
+
+      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', closeInteract));
+
+      // CAMERA: capture one frame and blend into background
+      async function cameraSnapshot(){
+        try{
+          const s = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+          const v = document.createElement('video'); v.autoplay = true; v.playsInline = true; v.muted = true; v.srcObject = s;
+          await new Promise(r=> v.addEventListener('loadeddata', r, {once:true}));
+          const c = document.createElement('canvas'); c.width = v.videoWidth || 640; c.height = v.videoHeight || 480;
+          const ctx = c.getContext('2d'); ctx.drawImage(v,0,0,c.width,c.height);
+          // stop tracks
+          s.getTracks().forEach(t=>t.stop());
+          const data = c.toDataURL('image/jpeg',0.8);
+          document.body.style.setProperty('--user-snap', `url(${data})`);
+          // paint into ::after
+          document.body.style.setProperty('background-image','');
+          const after = document.body; // use CSS via inline style on pseudo is not possible, so set style directly
+          // workaround: set a CSS variable and update body::after via styleSheet — instead we set a data attribute and toggle opacity via class
+          after.dataset.usersnap = data;
+          // apply by injecting a temporary style rule to use the data URI
+          const id = 'user-snap-style';
+          let el = document.getElementById(id);
+          if(!el){ el = document.createElement('style'); el.id = id; document.head.appendChild(el); }
+          el.textContent = `body::after{background-image: url(${data}); opacity: 0.24;}`;
+          closeInteract();
+        }catch(err){ alert('Camera access was denied or failed.'); }
+      }
+
+      // MIC: simple amplitude-reactive pulse in a small floating element
+      let audioCtx, analyser, micStream, rafId; const micDot = document.createElement('div'); micDot.style.position='fixed'; micDot.style.right='18px'; micDot.style.bottom='18px'; micDot.style.width='18px'; micDot.style.height='18px'; micDot.style.borderRadius='50%'; micDot.style.background='linear-gradient(90deg,#ffd3a5,#fd6585)'; micDot.style.boxShadow='0 6px 20px rgba(16,24,40,0.18)'; micDot.style.transform='scale(0.8)'; micDot.style.transition='transform .08s linear'; micDot.style.zIndex=1601; micDot.style.pointerEvents='none'; document.body.appendChild(micDot);
+
+      async function startMic(){
+        try{
+          const s = await navigator.mediaDevices.getUserMedia({audio:true});
+          audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+          const src = audioCtx.createMediaStreamSource(s);
+          analyser = audioCtx.createAnalyser(); analyser.fftSize = 256;
+          src.connect(analyser);
+          micStream = s;
+          const data = new Uint8Array(analyser.frequencyBinCount);
+          function tick(){ analyser.getByteFrequencyData(data); let sum=0; for(let i=0;i<data.length;i++) sum+=data[i]; const avg = sum/data.length/255; const scale = 0.8 + Math.min(1.6, avg*3.2); micDot.style.transform = `scale(${scale})`; rafId = requestAnimationFrame(tick); }
+          tick();
+        }catch(err){ alert('Microphone access denied or unavailable.'); }
+      }
+
+      function stopMic(){ if(micStream) micStream.getTracks().forEach(t=>t.stop()); if(audioCtx) audioCtx.close().catch(()=>{}); if(rafId) cancelAnimationFrame(rafId); micStream = null; audioCtx = null; rafId = null; micDot.style.transform='scale(0.8)'; }
+
+      useCamera.addEventListener('click', cameraSnapshot);
+      useMic.addEventListener('click', ()=>{ if(micStream) stopMic(); else startMic(); useMic.textContent = micStream ? 'Use microphone (reactive)' : 'Stop microphone'; });
     })();
 
     // small, continuous micro-movements on svg shapes to avoid neat repetition
