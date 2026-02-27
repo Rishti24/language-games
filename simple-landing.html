@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>It Continues — Minimal Landing</title>
+  <style>
+    :root{--bg1:#ffd8d8;--bg2:#d8e6ff;--accent:#4058ff;--text:#071028}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;
+      color:var(--text);display:flex;align-items:center;justify-content:center;
+      min-height:100vh;overflow-x:hidden;
+      background:linear-gradient(120deg,var(--bg1),var(--bg2));
+      position:relative;
+    }
+
+    /* Looping animated colorful background using layered gradients */
+    .bg-anim{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.95}
+    .blob{position:absolute;filter:blur(60px);opacity:0.9;mix-blend-mode:screen;transform-origin:center}
+    .b1{left:-10%;top:-10%;width:55vmax;height:55vmax;background:radial-gradient(circle at 30% 30%, #ff9aa2 0%, #ffd6a5 40%, transparent 60%);animation:move1 18s ease-in-out infinite}
+    .b2{right:-5%;top:10%;width:46vmax;height:46vmax;background:radial-gradient(circle at 70% 70%, #a0d2ff 0%, #c9f0ff 40%, transparent 60%);animation:move2 22s ease-in-out infinite}
+    .b3{left:20%;bottom:-15%;width:40vmax;height:40vmax;background:radial-gradient(circle at 40% 60%, #d5f6e3 0%, #e4ffd7 40%, transparent 60%);animation:move3 26s ease-in-out infinite}
+
+    @keyframes move1{0%{transform:translate(0,0) scale(1)}50%{transform:translate(4vmin, -6vmin) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes move2{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-6vmin, 4vmin) scale(1.03)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes move3{0%{transform:translate(0,0) scale(1)}50%{transform:translate(6vmin, 6vmin) scale(0.98)}100%{transform:translate(0,0) scale(1)}}
+
+    /* Container */
+    .page{position:relative;z-index:1;max-width:980px;padding:64px 24px;display:flex;flex-direction:column;gap:48px;align-items:center;text-align:center}
+
+    h1{font-size:clamp(32px,8vw,72px);line-height:1;letter-spacing:-0.02em;margin-bottom:6px}
+    p.lead{font-size:16px;color:rgba(7,16,40,0.7);max-width:56ch}
+
+    /* Gallery */
+    .gallery{display:flex;gap:16px;justify-content:center;align-items:stretch;flex-wrap:wrap}
+    .tile{width:220px;height:140px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,0.6),rgba(255,255,255,0.2));display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(10,20,40,0.06)}
+    .tile .img{width:90%;height:76px;border-radius:8px;background:linear-gradient(135deg,#ffffff55,#ffffff22);display:flex;align-items:center;justify-content:center;color:#536; font-weight:600}
+    .caption{margin-top:10px;font-size:13px;color:rgba(7,16,40,0.6)}
+
+    footer{font-size:14px;color:rgba(7,16,40,0.6)}
+
+    /* Responsive tweaks */
+    @media(max-width:640px){
+      .gallery{gap:12px}
+      .tile{width:46vw}
+      h1{font-size:36px}
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .b1,.b2,.b3{animation:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-anim" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+
+  <main class="page">
+    <header>
+      <h1>It continues</h1>
+      <p class="lead">A small, open gesture—interfaces that leave room to keep moving.</p>
+    </header>
+
+    <section class="gallery" aria-label="Gallery">
+      <div class="tile"><div class="img">Image A</div><div class="caption">Low pressure</div></div>
+      <div class="tile"><div class="img">Image B</div><div class="caption">Trace sample</div></div>
+      <div class="tile"><div class="img">Image C</div><div class="caption">Draft variant</div></div>
+    </section>
+
+    <footer>
+      <div>Leaves a small gap • experiments</div>
+    </footer>
+  </main>
+
+  <script>
+    // Minimal script: nothing required; keep file lightweight.
+    // Optionally, respect prefers-reduced-motion by halting animations earlier.
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(prefersReduced){document.querySelectorAll('.blob').forEach(b=>b.style.transition='none');}
+  </script>
+</body>
+</html>
