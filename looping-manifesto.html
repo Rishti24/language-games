@@ -11,26 +11,40 @@
     body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3));background-size:400% 400%;animation:shift 14s ease-in-out infinite;}
     @keyframes shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-    .wrap{width:min(980px,94vw);padding:4rem 2rem;display:flex;flex-direction:column;gap:2.5rem;backdrop-filter:blur(6px);border-radius:16px}
-    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.35));padding:2.2rem;border-radius:12px;box-shadow:0 6px 28px rgba(16,24,40,0.12)}
+    .wrap{width:min(980px,94vw);padding:4rem 2rem;display:flex;flex-direction:column;gap:2.5rem;border-radius:16px;background:rgba(255,255,255,0.12);z-index:1000}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,255,255,0.96));padding:2.2rem;border-radius:12px;box-shadow:0 18px 60px rgba(16,24,40,0.16);border:1px solid rgba(8,16,36,0.08)}
 
     .hero{display:flex;flex-direction:column;gap:.6rem}
-    .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:700;margin:0;color:#081029}
+    .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:800;margin:0;color:#031026;text-shadow:0 6px 22px rgba(8,16,32,0.06)}
 
     .sub{font-size:clamp(12px,2.2vw,16px);opacity:.78;margin:0}
     .sub .ellipsis{display:inline-block;min-width:5ch;opacity:.9}
 
     .gallery{display:flex;gap:14px;align-items:center}
-    .tile{flex:1;min-height:96px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:transparent;position:relative;border:1px solid #eef3f8}
+    .tile{flex:1;min-height:96px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,255,255,0.86),rgba(255,255,255,0.72));position:relative;border:1px solid rgba(8,20,40,0.06)}
     .tile svg{width:100%;height:100%;display:block}
-    .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:transparent;padding:4px 8px;color:#5b6b7a}
+    .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:rgba(255,255,255,0.6);backdrop-filter:blur(2px);padding:4px 8px;color:#0f172a;border-radius:6px}
     .tile .badge{position:absolute;right:8px;top:8px;font-size:11px;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#fff7ed,#fff1f2);color:#111827;border:1px solid rgba(8,16,36,0.04);font-weight:700;box-shadow:0 6px 18px rgba(16,24,40,0.08)}
     .tile:hover{transform:translateY(-8px) scale(1.03);transition:transform .28s cubic-bezier(.2,.9,.2,1);box-shadow:0 22px 46px rgba(16,24,40,0.14)}
     .tile{transition:transform .28s ease,box-shadow .28s ease}
 
+    /* hide the default cursor and render a soft fluid custom pointer */
+    body{cursor:none}
+    .pointer{position:fixed;left:0;top:0;z-index:2200;pointer-events:none;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%) scale(1);will-change:transform,opacity;transition:opacity .18s ease,transform .18s cubic-bezier(.2,.9,.3,1)}
+    .pointer .core{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.98),rgba(255,255,255,0.7));box-shadow:0 6px 22px rgba(8,16,36,0.12);border:1px solid rgba(8,16,36,0.04)}
+    .pointer .halo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,rgba(161,140,209,0.14),rgba(255,211,165,0.06));filter:blur(8px);opacity:0.9}
+    .pointer--press{transform:translate(-50%,-50%) scale(0.86)}
+    @keyframes spin {to{transform:rotate(360deg)}}
+    /* loading state */
+    .pointer.pointer--loading .halo{animation:spin 900ms linear infinite;filter:blur(6px);opacity:1}
+    .pointer.pointer--loading .core{transform:scale(0.92);box-shadow:0 14px 36px rgba(8,16,36,0.16);background:radial-gradient(circle at 30% 30%,#fff,#f3f4f6)}
+
+    /* make blobs less visually intrusive for clarity */
+    .blob{position:absolute;display:block;border-radius:50%;filter:blur(8px) saturate(1.02);mix-blend-mode:normal;opacity:0.66}
+
     /* animated decorative blobs */
     .blobs{position:fixed;inset:0;pointer-events:none;z-index:0}
-    .blob{position:absolute;display:block;border-radius:50%;filter:blur(48px);mix-blend-mode:screen;opacity:0.95}
+    .blob{position:absolute;display:block;border-radius:50%;filter:blur(18px) saturate(1.03);mix-blend-mode:screen;opacity:0.82}
     .blob.b1{width:420px;height:420px;left:-8%;top:8%;background:radial-gradient(circle at 30% 30%,#ff9a9e,#fbc2eb);animation:blobmove 18s ease-in-out infinite;transform:translate(calc(var(--mx) * 0.12px), calc(var(--my) * 0.12px))}
     .blob.b2{width:520px;height:520px;right:-12%;top:18%;background:radial-gradient(circle at 30% 30%,#a18cd1,#fad0c4);animation:blobmove 22s ease-in-out infinite;animation-delay:2s;transform:translate(calc(var(--mx) * -0.14px), calc(var(--my) * 0.1px))}
     .blob.b3{width:360px;height:360px;left:18%;bottom:-6%;background:radial-gradient(circle at 60% 40%,#ffd3a5,#fd6585);animation:blobmove 20s ease-in-out infinite;animation-delay:4s;transform:translate(calc(var(--mx) * 0.08px), calc(var(--my) * -0.16px))}
@@ -66,6 +80,7 @@
       <div style="display:flex;gap:12px;align-items:center">
         <span style="width:44px;height:6px;border-radius:6px;background:linear-gradient(90deg,#ffd3a5,#a18cd1);display:inline-block"></span>
         <h1 class="title">It continues, slightly unfinished.</h1>
+        <button class="read-title" aria-label="Read title" title="Read title" style="margin-left:10px;padding:6px 8px;border-radius:8px;border:1px solid rgba(8,16,36,0.06);background:transparent;cursor:pointer">🔊</button>
       </div>
       <p class="sub">A simple, looping interface — a space that keeps a small gap open.</p>
       <p style="margin:.6rem 0 0 0;color:#6b7280;font-size:13px;opacity:.95">An experimental palette, intentionally incomplete — click any frame to explore an in-progress thought.</p>
@@ -210,6 +225,22 @@
         const next = 380 + Math.floor(Math.random()*900);
         setTimeout(loop, next);
       })();
+      // add read-title control behavior (accessible speech)
+      (function(){
+        try{
+          const btn = document.querySelector('.read-title');
+          const title = document.querySelector('.title');
+          if(!btn || !title || !('speechSynthesis' in window)) return;
+          btn.addEventListener('click', ()=>{
+            const text = title.dataset.base || title.textContent || '';
+            if(!text) return;
+            try{ window.speechSynthesis.cancel(); }catch(e){}
+            const u = new SpeechSynthesisUtterance(text.trim());
+            u.rate = 1; u.pitch = 1; u.lang = document.documentElement.lang || 'en-US';
+            window.speechSynthesis.speak(u);
+          });
+        }catch(e){/* ignore */}
+      })();
     })();
 
     // CTA pulse
@@ -229,19 +260,47 @@
 
     
 
-    // small, continuous micro-movements on svg shapes to avoid neat repetition
+    // small, continuous micro-movements on svg shapes to feel like they're still forming
     (function(){
       const svgs = document.querySelectorAll('.tile svg g');
       svgs.forEach((g,i)=>{
-        const dur = 4500 + i*1300 + Math.floor(Math.random()*1800);
+        // faster, slightly larger random nudges to create a gentle "shaking/revealing" feel
+        const dur = 900 + i*300 + Math.floor(Math.random()*800);
         g.style.transition = `transform ${dur}ms cubic-bezier(.22,.9,.36,1)`;
         (function nudge(){
-          const tx = (Math.random()-0.5)*6;
-          const ty = (Math.random()-0.5)*6;
-          const rot = (Math.random()-0.5)*1.6;
+          const tx = (Math.random()-0.5)*16; // wider horizontal wobble
+          const ty = (Math.random()-0.5)*10; // subtle vertical jitter
+          const rot = (Math.random()-0.5)*4.2; // small rotation shake
           g.style.transform = `translate(${tx}px,${ty}px) rotate(${rot}deg)`;
-          setTimeout(nudge, dur + Math.floor(Math.random()*1200));
+          setTimeout(nudge, dur + Math.floor(Math.random()*600));
         })();
+      });
+    })();
+
+    // create a soft, fluid custom pointer that follows the real pointer with smoothing
+    (function(){
+      if(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return; // skip on touch
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const ptr = document.createElement('div'); ptr.className = 'pointer'; ptr.innerHTML = '<div class="halo"></div><div class="core"></div>';
+      document.body.appendChild(ptr);
+      let tx = window.innerWidth/2, ty = window.innerHeight/2; // target
+      let x = tx, y = ty; // current
+      const ease = 0.18;
+      function raf(){
+        x += (tx - x) * ease; y += (ty - y) * ease;
+        ptr.style.left = x + 'px'; ptr.style.top = y + 'px';
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+      // update target on pointer move
+      window.addEventListener('pointermove', (e)=>{ tx = e.clientX; ty = e.clientY; ptr.style.opacity = 1; });
+      window.addEventListener('pointerdown', ()=> ptr.classList.add('pointer--press'));
+      window.addEventListener('pointerup', ()=> ptr.classList.remove('pointer--press'));
+
+      // subtle interaction cue: when hovering tiles, slightly grow pointer and add glow
+      document.querySelectorAll('.tile').forEach(t => {
+        t.addEventListener('pointerenter', ()=>{ ptr.style.transform = 'translate(-50%,-50%) scale(1.06)'; ptr.style.boxShadow = '0 10px 30px rgba(8,16,36,0.12)'; });
+        t.addEventListener('pointerleave', ()=>{ ptr.style.transform = 'translate(-50%,-50%) scale(1)'; ptr.style.boxShadow = ''; });
       });
     })();
     // overlays: open small in-page popup panels with progressive reveal
@@ -327,12 +386,22 @@
         try{ history.replaceState(null,'', location.pathname + location.search + '#'); }catch(e){ location.hash = ''; }
       }
 
-      // wire tile clicks to open overlay (prevent leaving page)
+      // wire tile clicks to open overlay (prevent leaving page) and show pointer loading
       document.querySelectorAll('.tile').forEach(tile =>{
+        let hoverTimer = null;
+        tile.addEventListener('pointerenter', ()=>{
+          const ptr = document.querySelector('.pointer');
+          hoverTimer = setTimeout(()=>{ if(ptr) ptr.classList.add('pointer--loading'); }, 420);
+        });
+        tile.addEventListener('pointerleave', ()=>{
+          clearTimeout(hoverTimer);
+          const ptr = document.querySelector('.pointer'); if(ptr) ptr.classList.remove('pointer--loading');
+        });
         tile.addEventListener('click', (ev)=>{
           ev.preventDefault();
           const id = tile.dataset.id;
-          openOverlay(id);
+          const ptr = document.querySelector('.pointer'); if(ptr) ptr.classList.add('pointer--loading');
+          setTimeout(()=>{ openOverlay(id); if(ptr) ptr.classList.remove('pointer--loading'); }, 420);
         });
       });
 
