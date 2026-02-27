@@ -54,51 +54,89 @@
     </section>
 
     <section class="gallery">
-      <div class="tile" aria-hidden="true">
-        <svg viewBox="0 0 200 100" preserveAspectRatio="none" class="osc">
+      <button class="tile open" data-id="1" aria-label="Open work in progress image 1">
+        <svg id="svg1" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc">
           <defs>
             <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff9a9e"/><stop offset="1" stop-color="#fbc2eb"/></linearGradient>
           </defs>
-          <rect width="200" height="100" fill="url(#g1)"/>
-          <g fill-opacity=".12">
-            <circle cx="40" cy="60" r="36" fill="#ffffff" />
+          <rect width="300" height="160" fill="url(#g1)"/>
+          <g fill="#fff" fill-opacity="0.14">
+            <circle cx="60" cy="100" r="50" />
+            <circle cx="220" cy="50" r="30" />
+          </g>
+          <g fill="none" stroke="#081029" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.06">
+            <path d="M10 20 C 60 10, 120 40, 170 30 S 270 40, 290 20" />
+            <path d="M10 140 C 80 120, 150 140, 290 110" />
           </g>
         </svg>
-        <div class="label">Loop 01</div>
-      </div>
+        <div class="label">WIP — Loop Study</div>
+      </button>
 
-      <div class="tile" aria-hidden="true">
-        <svg viewBox="0 0 200 100" preserveAspectRatio="none" class="osc" style="animation-delay:0.8s">
+      <button class="tile open" data-id="2" aria-label="Open work in progress image 2">
+        <svg id="svg2" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:0.4s">
           <defs>
             <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#a18cd1"/><stop offset="1" stop-color="#fad0c4"/></linearGradient>
+            <filter id="grain"><feTurbulence baseFrequency="0.9" numOctaves="1" result="t"/><feColorMatrix type="saturate" values="0"/></filter>
           </defs>
-          <rect width="200" height="100" fill="url(#g2)"/>
-          <g fill-opacity=".10">
-            <rect x="80" y="12" width="84" height="84" rx="18" fill="#ffffff" />
+          <rect width="300" height="160" fill="url(#g2)"/>
+          <g transform="translate(0,12)" opacity="0.12">
+            <rect x="36" y="12" width="228" height="120" rx="18" fill="#fff" />
+          </g>
+          <g fill="#081029" fill-opacity="0.06">
+            <circle cx="75" cy="48" r="22" />
+            <rect x="180" y="78" width="76" height="28" rx="6" />
           </g>
         </svg>
-        <div class="label">Loop 02</div>
-      </div>
+        <div class="label">WIP — Interface Sketch</div>
+      </button>
 
-      <div class="tile" aria-hidden="true">
-        <svg viewBox="0 0 200 100" preserveAspectRatio="none" class="osc" style="animation-delay:1.6s">
+      <button class="tile open" data-id="3" aria-label="Open work in progress image 3">
+        <svg id="svg3" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:1.1s">
           <defs>
             <linearGradient id="g3" x1="0" x2="1"><stop offset="0" stop-color="#ffd3a5"/><stop offset="1" stop-color="#fd6585"/></linearGradient>
           </defs>
-          <rect width="200" height="100" fill="url(#g3)"/>
-          <g fill-opacity=".09">
-            <path d="M30 70c20-40 80-40 110 0" fill="#fff"/>
+          <rect width="300" height="160" fill="url(#g3)"/>
+          <g fill="#fff" fill-opacity="0.1">
+            <path d="M30 110c30-60 120-60 200-6"/>
+            <circle cx="40" cy="40" r="18"/>
+          </g>
+          <g fill-opacity="0.07" fill="#081029">
+            <rect x="110" y="28" width="78" height="18" rx="6"/>
+            <rect x="40" y="118" width="220" height="6" rx="3"/>
           </g>
         </svg>
-        <div class="label">Loop 03</div>
-      </div>
+        <div class="label">WIP — Glitch Frame</div>
+      </button>
     </section>
+
+    <!-- modal viewer for experimental images -->
+    <div id="viewer" class="viewer" hidden aria-hidden="true">
+      <div class="viewer-backdrop" data-close></div>
+      <div class="viewer-frame" role="dialog" aria-modal="true">
+        <div class="viewer-content" id="viewer-content" tabindex="0"></div>
+        <div class="viewer-meta">
+          <span id="viewer-caption"></span>
+          <button id="viewer-close" aria-label="Close">Close</button>
+        </div>
+      </div>
+    </div>
 
     <footer>
       <small>Manifesto-inspired interface — intentionally leaving space.</small>
     </footer>
   </main>
 
+  <style>
+    /* viewer styles (kept in-page for single-file deliverable) */
+    .viewer{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
+    .viewer-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.56);backdrop-filter:blur(4px)}
+    .viewer-frame{position:relative;max-width:94vw;max-height:92vh;padding:18px;display:flex;flex-direction:column;gap:12px;align-items:center}
+    .viewer-content{background:transparent;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center}
+    .viewer-content svg{box-shadow:0 20px 60px rgba(2,6,23,0.25);border-radius:8px}
+    .viewer-meta{display:flex;gap:12px;align-items:center;color:#fff}
+    #viewer-caption{font-size:13px;opacity:0.95}
+    #viewer-close{background:rgba(255,255,255,0.12);border:0;padding:8px 12px;border-radius:8px;color:#fff}
+  </style>
   <script>
     // tiny theme nudge: shift background colors slowly for variety
     (function(){
@@ -154,6 +192,48 @@
           setTimeout(nudge, dur + Math.floor(Math.random()*1200));
         })();
       });
+    })();
+    // image viewer: open inline SVGs into a simple modal (experimental/wip aesthetic)
+    (function(){
+      const viewer = document.getElementById('viewer');
+      const content = document.getElementById('viewer-content');
+      const caption = document.getElementById('viewer-caption');
+      const closeBtn = document.getElementById('viewer-close');
+
+      function open(tile){
+        const svg = tile.querySelector('svg');
+        const label = tile.querySelector('.label')?.textContent || '';
+        if(!svg) return;
+        // clone svg for larger view
+        const clone = svg.cloneNode(true);
+        clone.setAttribute('width','900');
+        clone.setAttribute('height','480');
+        clone.style.maxWidth = '90vw';
+        clone.style.height = 'auto';
+        content.innerHTML = '';
+        content.appendChild(clone);
+        caption.textContent = label + ' — experimental / work-in-progress';
+        viewer.hidden = false;
+        viewer.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+        // focus for keyboard close
+        closeBtn.focus();
+      }
+
+      function close(){
+        viewer.hidden = true;
+        viewer.setAttribute('aria-hidden','true');
+        content.innerHTML = '';
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('.tile.open').forEach(tile=>{
+        tile.addEventListener('click', ()=> open(tile));
+      });
+
+      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', close));
+      closeBtn.addEventListener('click', close);
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
     })();
   </script>
 </body>
