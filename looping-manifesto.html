@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Looping — Manifesto</title>
   <style>
-    :root{--bg1:#ff9a9e;--bg2:#fad0c4;--bg3:#a18cd1;--bg4:#fbc2eb;--accent:#0f172a}
+    :root{--bg1:#ff9a9e;--bg2:#fad0c4;--bg3:#a18cd1;--bg4:#fbc2eb;--accent:#0f172a;--mx:0;--my:0}
     html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; color:var(--accent)}
     /* colorful looping animated background */
     body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3));background-size:400% 400%;animation:shift 14s ease-in-out infinite;}
@@ -31,9 +31,9 @@
     /* animated decorative blobs */
     .blobs{position:fixed;inset:0;pointer-events:none;z-index:0}
     .blob{position:absolute;display:block;border-radius:50%;filter:blur(48px);mix-blend-mode:screen;opacity:0.95}
-    .blob.b1{width:420px;height:420px;left:-8%;top:8%;background:radial-gradient(circle at 30% 30%,#ff9a9e,#fbc2eb);animation:blobmove 18s ease-in-out infinite}
-    .blob.b2{width:520px;height:520px;right:-12%;top:18%;background:radial-gradient(circle at 30% 30%,#a18cd1,#fad0c4);animation:blobmove 22s ease-in-out infinite;animation-delay:2s}
-    .blob.b3{width:360px;height:360px;left:18%;bottom:-6%;background:radial-gradient(circle at 60% 40%,#ffd3a5,#fd6585);animation:blobmove 20s ease-in-out infinite;animation-delay:4s}
+    .blob.b1{width:420px;height:420px;left:-8%;top:8%;background:radial-gradient(circle at 30% 30%,#ff9a9e,#fbc2eb);animation:blobmove 18s ease-in-out infinite;transform:translate(calc(var(--mx) * 0.12px), calc(var(--my) * 0.12px))}
+    .blob.b2{width:520px;height:520px;right:-12%;top:18%;background:radial-gradient(circle at 30% 30%,#a18cd1,#fad0c4);animation:blobmove 22s ease-in-out infinite;animation-delay:2s;transform:translate(calc(var(--mx) * -0.14px), calc(var(--my) * 0.1px))}
+    .blob.b3{width:360px;height:360px;left:18%;bottom:-6%;background:radial-gradient(circle at 60% 40%,#ffd3a5,#fd6585);animation:blobmove 20s ease-in-out infinite;animation-delay:4s;transform:translate(calc(var(--mx) * 0.08px), calc(var(--my) * -0.16px))}
     @keyframes blobmove{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-30px) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
 
     footer{font-size:12px;opacity:.72;text-align:center}
@@ -439,6 +439,65 @@
       // close handlers
       document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', closeOverlay));
       window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeOverlay(); });
+    })();
+
+    // pointer-driven motion: parallax blobs and tile tilt
+    (function(){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const root = document.documentElement;
+      let tx = 0, ty = 0, cx = 0, cy = 0;
+      const ease = 0.08;
+
+      function onPointerMove(e){
+        const x = (e.clientX != null) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || window.innerWidth/2;
+        const y = (e.clientY != null) ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY) || window.innerHeight/2;
+        const nx = (x - window.innerWidth/2) / (window.innerWidth/2); // -1..1
+        const ny = (y - window.innerHeight/2) / (window.innerHeight/2);
+        tx = nx * 28; ty = ny * 28; // target motion values
+        cx = x; cy = y;
+      }
+
+      // tile tilt: update per tile on pointermove
+      function updateTiles(){
+        // smooth CSS vars
+        const curX = parseFloat(getComputedStyle(root).getPropertyValue('--mx')) || 0;
+        const curY = parseFloat(getComputedStyle(root).getPropertyValue('--my')) || 0;
+        const nx = curX + (tx - curX) * ease;
+        const ny = curY + (ty - curY) * ease;
+        root.style.setProperty('--mx', nx.toFixed(3));
+        root.style.setProperty('--my', ny.toFixed(3));
+
+        // tilt tiles
+        document.querySelectorAll('.tile').forEach(tile=>{
+          const rect = tile.getBoundingClientRect();
+          const rx = (cx - (rect.left + rect.width/2)) / (rect.width/2); // -1..1
+          const ry = (cy - (rect.top + rect.height/2)) / (rect.height/2);
+          const rotY = rx * 6; const rotX = -ry * 6;
+          const depth = 8 + Math.min(12, Math.hypot(nx,ny)*0.6);
+          tile.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(${depth}px)`;
+        });
+
+        requestAnimationFrame(updateTiles);
+      }
+
+      // reset transforms on leave
+      document.querySelectorAll('.tile').forEach(tile=>{
+        tile.addEventListener('pointerenter', ()=>{ tile.style.transition = 'transform .14s cubic-bezier(.2,.9,.2,1)'; });
+        tile.addEventListener('pointerleave', ()=>{ tile.style.transition = 'transform .28s ease'; tile.style.transform = ''; });
+      });
+
+      // pointer events
+      window.addEventListener('pointermove', onPointerMove, {passive:true});
+      // device orientation for mobile
+      if(window.DeviceOrientationEvent){
+        window.addEventListener('deviceorientation', (ev)=>{
+          if(ev.gamma==null) return;
+          // gamma: left-right, beta: front-back
+          tx = (ev.gamma/90) * 24; ty = (ev.beta/90) * 24;
+        });
+      }
+
+      updateTiles();
     })();
   </script>
 </body>
