@@ -7,13 +7,12 @@
   <style>
     :root{--bg1:#ff9a9e;--bg2:#fad0c4;--bg3:#a18cd1;--bg4:#fbc2eb;--accent:#0f172a}
     html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; color:var(--accent)}
-    /* layered, slow-moving gradient to feel like an endless field */
-    /* flat background: subtle, no depth or heavy motion */
-    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fbfcfe,#f3f6fb);}
+    /* colorful looping animated background */
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3));background-size:400% 400%;animation:shift 14s ease-in-out infinite;}
+    @keyframes shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-    .wrap{width:min(980px,94vw);padding:3.2rem 2rem;display:flex;flex-direction:column;gap:2rem;border-radius:6px}
-    /* very flat panel: subtle border, no shadows or blur */
-    .panel{background:#ffffff;padding:1.6rem;border-radius:6px;border:1px solid #e7ecf3}
+    .wrap{width:min(980px,94vw);padding:4rem 2rem;display:flex;flex-direction:column;gap:2.5rem;backdrop-filter:blur(6px);border-radius:16px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.35));padding:2.2rem;border-radius:12px;box-shadow:0 6px 28px rgba(16,24,40,0.12)}
 
     .hero{display:flex;flex-direction:column;gap:.6rem}
     .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:700;margin:0;color:#081029}
@@ -25,6 +24,9 @@
     .tile{flex:1;min-height:96px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:transparent;position:relative;border:1px solid #eef3f8}
     .tile svg{width:100%;height:100%;display:block}
     .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:transparent;padding:4px 8px;color:#5b6b7a}
+    .tile .badge{position:absolute;right:8px;top:8px;font-size:11px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.9);color:#111827;border:1px solid rgba(8,16,36,0.04);font-weight:600}
+    .tile:hover{transform:translateY(-6px) scale(1.02);transition:transform .28s cubic-bezier(.2,.9,.2,1)}
+    .tile{transition:transform .28s ease,box-shadow .28s ease}
 
     footer{font-size:12px;opacity:.72;text-align:center}
 
@@ -48,8 +50,12 @@
 <body>
   <main class="wrap panel" role="main">
     <section class="hero">
-      <h1 class="title">It continues, slightly unfinished.</h1>
+      <div style="display:flex;gap:12px;align-items:center">
+        <span style="width:44px;height:6px;border-radius:6px;background:linear-gradient(90deg,#ffd3a5,#a18cd1);display:inline-block"></span>
+        <h1 class="title">It continues, slightly unfinished.</h1>
+      </div>
       <p class="sub">A simple, looping interface — a space that keeps a small gap open.</p>
+      <p style="margin:.6rem 0 0 0;color:#6b7280;font-size:13px;opacity:.95">An experimental palette, intentionally incomplete — click any frame to explore an in-progress thought.</p>
     </section>
 
     <section class="gallery">
@@ -69,6 +75,7 @@
           </g>
         </svg>
         <div class="label">WIP — Loop Study</div>
+        <div class="badge">in-progress</div>
       </a>
 
       <a class="tile" data-id="2" data-side="true" href="#/wip/2" aria-label="Open work in progress image 2">
@@ -87,6 +94,7 @@
           </g>
         </svg>
         <div class="label">WIP — Interface Sketch</div>
+        <div class="badge">draft</div>
       </a>
 
       <a class="tile" data-id="3" data-side="true" href="#/wip/3" aria-label="Open work in progress image 3">
@@ -105,6 +113,7 @@
           </g>
         </svg>
         <div class="label">WIP — Glitch Frame</div>
+        <div class="badge">experimental</div>
       </a>
     </section>
 
@@ -124,24 +133,22 @@
   </main>
 
   <style>
-    /* viewer styles (kept in-page for single-file deliverable) */
-    /* page viewer used when opening full-screen; keep flat colors */
-    .page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
-    .page-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.48)}
-    .page-frame{position:relative;max-width:94vw;max-height:92vh;padding:18px;display:flex;flex-direction:column;gap:12px;align-items:center}
-    .page-content{background:transparent;border-radius:6px;overflow:auto;display:flex;align-items:center;justify-content:center}
-    .page-content svg{border-radius:6px;display:block;width:100%;height:auto}
-    .page-caption{color:#081029;font-size:13px;opacity:0.9}
-    .page-back{position:absolute;left:18px;top:18px;color:#081029;background:transparent;padding:6px 10px;border-radius:6px;text-decoration:none;border:1px solid #e7ecf3}
-
-    /* side tab: small flat drawer */
-    .side{position:fixed;right:0;top:0;height:100vh;width:340px;background:#ffffff;border-left:1px solid #e7ecf3;transform:translateX(100%);transition:transform .28s ease;z-index:1500;display:flex;flex-direction:column}
-    .side.open{transform:translateX(0)}
-    .side-header{padding:12px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
-    .side-title{font-weight:600;color:#081029}
-    .side-close{background:transparent;border:0;padding:8px;color:#5b6b7a}
-    .side-body{padding:12px 14px;overflow:auto;flex:1}
-    .side-body svg{width:100%;height:auto;display:block}
+    /* overlay styles (in-page popups) */
+    .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
+    .overlay-backdrop{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,24,0.36),rgba(8,16,36,0.42));backdrop-filter:blur(6px)}
+    .overlay-card{position:relative;max-width:780px;width:min(94vw,780px);background:linear-gradient(180deg,rgba(255,255,255,0.96),rgba(255,255,255,0.9));border-radius:12px;padding:18px;border:1px solid rgba(8,16,36,0.06);box-shadow:0 30px 80px rgba(8,16,36,0.14);transform:translateY(10px);opacity:0;transition:opacity .26s ease,transform .26s ease}
+    .overlay.open .overlay-card{opacity:1;transform:translateY(0)}
+    .overlay-inner{display:flex;gap:18px;align-items:flex-start}
+    .overlay-left{flex:0 0 44%;min-width:240px}
+    .overlay-right{flex:1}
+    .overlay-close{position:absolute;right:12px;top:12px;background:transparent;border:0;font-size:16px;color:#374151}
+    .overlay h3{margin:0 0 8px 0;font-size:18px}
+    .overlay p{margin:0 0 8px 0;color:#374151}
+    .reveal{opacity:0;transform:translateY(6px);transition:opacity .34s ease,transform .34s ease}
+    .reveal.show{opacity:1;transform:translateY(0)}
+    .meta{font-size:12px;color:#6b7280;margin-top:8px}
+    .tags{display:flex;gap:8px;margin-top:10px}
+    .tag{font-size:11px;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#f3f4f6,#fff);border:1px solid rgba(8,16,36,0.04);color:#374151}
   </style>
   <script>
     // tiny theme nudge: shift background colors slowly for variety
@@ -199,116 +206,119 @@
         })();
       });
     })();
-    // in-site page routing: use hash (#/wip/1) to open a full-screen page or side tab for tiles
+    // overlays: open small in-page popup panels with progressive reveal
     (function(){
-      const page = document.getElementById('page');
-      const content = document.getElementById('page-content');
-      const caption = document.getElementById('page-caption');
-      const side = createSide();
+      // create overlay DOM
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay'; overlay.id = 'overlay'; overlay.hidden = true; overlay.setAttribute('aria-hidden','true');
+      overlay.innerHTML = `
+        <div class="overlay-backdrop" data-close></div>
+        <div class="overlay-card" role="dialog" aria-modal="true">
+          <button class="overlay-close" data-close aria-label="Close">✕</button>
+          <div class="overlay-inner">
+            <div class="overlay-left" id="overlay-left"></div>
+            <div class="overlay-right" id="overlay-right"></div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
 
-      function createSide(){
-        const s = document.createElement('aside');
-        s.id = 'side'; s.className = 'side'; s.setAttribute('aria-hidden','true');
-        s.innerHTML = `
-          <div class="side-header"><div class="side-title" id="side-title"></div><button class="side-close" id="side-close">✕</button></div>
-          <div class="side-body" id="side-body"></div>
-        `;
-        document.body.appendChild(s);
-        s.querySelector('#side-close').addEventListener('click', ()=> { closeSide(); history.replaceState(null,'', location.pathname + location.search + '#'); });
-        return s;
-      }
+      const innerLeft = document.getElementById('overlay-left');
+      const innerRight = document.getElementById('overlay-right');
 
-      function openSide(id){
+      function openOverlay(id){
         const tile = document.querySelector(`.tile[data-id="${id}"]`);
         if(!tile) return;
         const svg = tile.querySelector('svg');
         const label = tile.querySelector('.label')?.textContent || '';
-        const body = document.getElementById('side-body');
-        const title = document.getElementById('side-title');
-        body.innerHTML = '';
+        // clear
+        innerLeft.innerHTML = '';
+        innerRight.innerHTML = '';
+
+        // clone svg for left pane
         const clone = svg.cloneNode(true);
         clone.removeAttribute('preserveAspectRatio');
         clone.setAttribute('preserveAspectRatio','xMidYMid meet');
-        clone.style.width = '100%';
-        clone.style.height = 'auto';
-        body.appendChild(clone);
-        title.textContent = label;
-        side.classList.add('open');
-        side.setAttribute('aria-hidden','false');
+        clone.style.width = '100%'; clone.style.height = 'auto';
+        innerLeft.appendChild(clone);
+
+        // progressive content on right
+        const h = document.createElement('h3'); h.textContent = label; h.className = 'reveal'; innerRight.appendChild(h);
+        const p1 = document.createElement('p'); p1.textContent = 'Work in progress — slightly unfinished. Content arrives slowly.'; p1.className = 'reveal'; innerRight.appendChild(p1);
+        // meta + tags
+        const meta = document.createElement('div'); meta.className = 'meta reveal'; meta.textContent = 'Status: in-progress · Author: experimental'; innerRight.appendChild(meta);
+        const tags = document.createElement('div'); tags.className = 'tags reveal'; ['loop','draft','open'].forEach(t=>{ const s = document.createElement('span'); s.className='tag'; s.textContent=t; tags.appendChild(s)}); innerRight.appendChild(tags);
+        const dots = document.createElement('div'); dots.className = 'reveal'; innerRight.appendChild(dots);
+        const cont = document.createElement('button'); cont.textContent = 'continue'; cont.className = 'reveal'; cont.style.marginTop = '10px'; cont.style.padding = '8px 10px'; cont.style.border='1px solid rgba(8,16,36,0.06)'; cont.style.background='transparent'; cont.style.borderRadius='8px'; innerRight.appendChild(cont);
+
+        // show overlay
+        overlay.hidden = false; overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
         document.body.style.overflow = 'hidden';
-      }
 
-      function closeSide(){
-        side.classList.remove('open');
-        side.setAttribute('aria-hidden','true');
-        document.getElementById('side-body').innerHTML = '';
-        document.body.style.overflow = '';
-      }
+        // set hash for shareability (replaceState avoids adding history entry)
+        try{ history.replaceState(null,'', location.pathname + location.search + `#/wip/${id}`); }catch(e){ location.hash = `/wip/${id}` }
 
-      function showPage(id){
-        const tile = document.querySelector(`.tile[data-id="${id}"]`);
-        if(!tile) return hidePage();
-        const svg = tile.querySelector('svg');
-        const label = tile.querySelector('.label')?.textContent || '';
-        content.innerHTML = '';
-        const clone = svg.cloneNode(true);
-        clone.removeAttribute('preserveAspectRatio');
-        clone.setAttribute('preserveAspectRatio','xMidYMid meet');
-        clone.style.maxWidth = '92vw';
-        clone.style.maxHeight = '78vh';
-        content.appendChild(clone);
-        caption.textContent = label + ' — experimental / work-in-progress';
-        page.hidden = false;
-        page.setAttribute('aria-hidden','false');
-        document.body.style.overflow = 'hidden';
-      }
+        // staged reveal
+        setTimeout(()=> h.classList.add('show'), 120);
+        setTimeout(()=> p1.classList.add('show'), 420);
+        setTimeout(()=> meta.classList.add('show'), 680);
+        setTimeout(()=> tags.classList.add('show'), 920);
+        // progressive dots to feel unfinished
+        let i=0; const dotInt = setInterval(()=>{ dots.textContent = Array((i%5)+1).fill('.').join(''); dots.classList.add('show'); i++; }, 360);
 
-      function hidePage(){
-        page.hidden = true;
-        page.setAttribute('aria-hidden','true');
-        content.innerHTML = '';
-        caption.textContent = '';
-        document.body.style.overflow = '';
-      }
-
-      function route(){
-        const h = location.hash || '';
-        const m = h.match(/^#\/wip\/(\d+)/);
-        if(m){
-          const id = m[1];
-          const tile = document.querySelector(`.tile[data-id="${id}"]`);
-          if(tile && tile.dataset.side === 'true'){
-            openSide(id);
-            // keep hash in URL for linkability
-          } else {
-            showPage(id);
-          }
-        } else {
-          hidePage();
-          closeSide();
+        // progressive continue reveals more content
+        let contStage = 0; const more = ['A sentence left open', 'A fragment that loops', 'Another unfinished thought…'];
+        function revealMore(){
+          if(contStage >= more.length) return;
+          const p = document.createElement('p'); p.textContent = more[contStage]; p.className = 'reveal'; innerRight.appendChild(p);
+          setTimeout(()=> p.classList.add('show'), 80);
+          contStage++;
         }
+        cont.addEventListener('click', revealMore);
+
+        // store cleanup handle
+        overlay._cleanup = ()=>{ clearInterval(dotInt); cont.removeEventListener('click', revealMore); };
       }
 
-      // close when clicking backdrop or back link
-      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', ()=> location.hash = ''));
-      document.querySelectorAll('.page-back').forEach(n=>n.addEventListener('click', ()=> setTimeout(()=>{ location.hash = '' },10) ));
+      function closeOverlay(){
+        overlay.hidden = true; overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
+        innerLeft.innerHTML = ''; innerRight.innerHTML = '';
+        document.body.style.overflow = '';
+        if(overlay._cleanup) overlay._cleanup();
+        // clear hash without adding history entry
+        try{ history.replaceState(null,'', location.pathname + location.search + '#'); }catch(e){ location.hash = ''; }
+      }
 
-      // intercept tile clicks to open side immediately (prevents navigation jump)
+      // wire tile clicks to open overlay (prevent leaving page)
       document.querySelectorAll('.tile').forEach(tile =>{
         tile.addEventListener('click', (ev)=>{
+          ev.preventDefault();
           const id = tile.dataset.id;
-          if(tile.dataset.side === 'true'){
-            ev.preventDefault();
-            // update hash for shareability
-            location.hash = `/wip/${id}`;
-            // route handler will open the side
-          }
+          openOverlay(id);
         });
       });
 
-      window.addEventListener('hashchange', route);
-      // init
-      route();
+      // also support opening via hash links (#/wip/1) and intercept same-page links
+      function routeFromHash(){
+        const h = location.hash || '';
+        const m = h.match(/^#\/wip\/(\d+)/);
+        if(m){ openOverlay(m[1]); }
+      }
+      window.addEventListener('hashchange', routeFromHash);
+      // intercept anchor clicks that point to internal wip links
+      document.addEventListener('click', (ev)=>{
+        const a = ev.target.closest && ev.target.closest('a');
+        if(!a) return;
+        const href = a.getAttribute('href') || '';
+        const m = href.match(/^#\/wip\/(\d+)/);
+        if(m){ ev.preventDefault(); openOverlay(m[1]); }
+      });
+      // init from hash if present
+      routeFromHash();
+
+      // close handlers
+      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', closeOverlay));
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeOverlay(); });
     })();
   </script>
 </body>
