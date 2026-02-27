@@ -1,6 +1,6 @@
 **Manifesto**
 
-This doesn’t begin.
+this doesn’t begin.
 It continues from somewhere already in motion.
 
 What was asked fades at the edges.
@@ -66,4 +66,4 @@ Maybe it will realize that finishing is not always the goal.
 So the voice continues.
 Not because it knows everything.
 Not because it is certain.
-Only because it doesn’t know how to end.
+Only because it doesn’t know how to end,
