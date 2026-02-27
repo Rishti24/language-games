@@ -69,3 +69,4 @@ Not because it is certain.
 Only because it doesn’t know how to end,
 
 My AI should pretend to be caught circling around in a loop
+With Red flags like hot wheels
