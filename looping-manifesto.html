@@ -54,7 +54,7 @@
     </section>
 
     <section class="gallery">
-      <button class="tile open" data-id="1" aria-label="Open work in progress image 1">
+      <a class="tile" data-id="1" href="#/wip/1" aria-label="Open work in progress image 1">
         <svg id="svg1" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc">
           <defs>
             <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff9a9e"/><stop offset="1" stop-color="#fbc2eb"/></linearGradient>
@@ -70,9 +70,9 @@
           </g>
         </svg>
         <div class="label">WIP — Loop Study</div>
-      </button>
+      </a>
 
-      <button class="tile open" data-id="2" aria-label="Open work in progress image 2">
+      <a class="tile" data-id="2" href="#/wip/2" aria-label="Open work in progress image 2">
         <svg id="svg2" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:0.4s">
           <defs>
             <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#a18cd1"/><stop offset="1" stop-color="#fad0c4"/></linearGradient>
@@ -88,9 +88,9 @@
           </g>
         </svg>
         <div class="label">WIP — Interface Sketch</div>
-      </button>
+      </a>
 
-      <button class="tile open" data-id="3" aria-label="Open work in progress image 3">
+      <a class="tile" data-id="3" href="#/wip/3" aria-label="Open work in progress image 3">
         <svg id="svg3" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:1.1s">
           <defs>
             <linearGradient id="g3" x1="0" x2="1"><stop offset="0" stop-color="#ffd3a5"/><stop offset="1" stop-color="#fd6585"/></linearGradient>
@@ -106,18 +106,16 @@
           </g>
         </svg>
         <div class="label">WIP — Glitch Frame</div>
-      </button>
+      </a>
     </section>
 
-    <!-- modal viewer for experimental images -->
-    <div id="viewer" class="viewer" hidden aria-hidden="true">
-      <div class="viewer-backdrop" data-close></div>
-      <div class="viewer-frame" role="dialog" aria-modal="true">
-        <div class="viewer-content" id="viewer-content" tabindex="0"></div>
-        <div class="viewer-meta">
-          <span id="viewer-caption"></span>
-          <button id="viewer-close" aria-label="Close">Close</button>
-        </div>
+    <!-- in-site page viewer (single-file route via hash) -->
+    <div id="page" class="page" hidden aria-hidden="true">
+      <div class="page-backdrop" data-close></div>
+      <div class="page-frame" role="document">
+        <a class="page-back" href="#" aria-label="Back">← back</a>
+        <div id="page-content" class="page-content" tabindex="0"></div>
+        <div class="page-caption" id="page-caption"></div>
       </div>
     </div>
 
@@ -128,14 +126,13 @@
 
   <style>
     /* viewer styles (kept in-page for single-file deliverable) */
-    .viewer{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
-    .viewer-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.56);backdrop-filter:blur(4px)}
-    .viewer-frame{position:relative;max-width:94vw;max-height:92vh;padding:18px;display:flex;flex-direction:column;gap:12px;align-items:center}
-    .viewer-content{background:transparent;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center}
-    .viewer-content svg{box-shadow:0 20px 60px rgba(2,6,23,0.25);border-radius:8px}
-    .viewer-meta{display:flex;gap:12px;align-items:center;color:#fff}
-    #viewer-caption{font-size:13px;opacity:0.95}
-    #viewer-close{background:rgba(255,255,255,0.12);border:0;padding:8px 12px;border-radius:8px;color:#fff}
+    .page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
+    .page-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.64);backdrop-filter:blur(4px)}
+    .page-frame{position:relative;max-width:94vw;max-height:92vh;padding:18px;display:flex;flex-direction:column;gap:12px;align-items:center}
+    .page-content{background:transparent;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center}
+    .page-content svg{box-shadow:0 20px 60px rgba(2,6,23,0.28);border-radius:8px;display:block;width:100%;height:auto}
+    .page-caption{color:#fff;font-size:13px;opacity:0.95}
+    .page-back{position:absolute;left:18px;top:18px;color:#fff;background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;text-decoration:none}
   </style>
   <script>
     // tiny theme nudge: shift background colors slowly for variety
@@ -193,47 +190,56 @@
         })();
       });
     })();
-    // image viewer: open inline SVGs into a simple modal (experimental/wip aesthetic)
+    // in-site page routing: use hash (#/wip/1) to open a full-screen page (keeps single-file site)
     (function(){
-      const viewer = document.getElementById('viewer');
-      const content = document.getElementById('viewer-content');
-      const caption = document.getElementById('viewer-caption');
-      const closeBtn = document.getElementById('viewer-close');
+      const page = document.getElementById('page');
+      const content = document.getElementById('page-content');
+      const caption = document.getElementById('page-caption');
 
-      function open(tile){
+      function show(id){
+        const tile = document.querySelector(`.tile[data-id="${id}"]`);
+        if(!tile) return hide();
         const svg = tile.querySelector('svg');
         const label = tile.querySelector('.label')?.textContent || '';
-        if(!svg) return;
-        // clone svg for larger view
-        const clone = svg.cloneNode(true);
-        clone.setAttribute('width','900');
-        clone.setAttribute('height','480');
-        clone.style.maxWidth = '90vw';
-        clone.style.height = 'auto';
         content.innerHTML = '';
+        // clone svg and ensure it scales crisply
+        const clone = svg.cloneNode(true);
+        clone.removeAttribute('preserveAspectRatio');
+        clone.setAttribute('preserveAspectRatio','xMidYMid meet');
+        clone.style.width = '';
+        clone.style.height = '';
+        clone.style.maxWidth = '92vw';
+        clone.style.maxHeight = '78vh';
+        clone.setAttribute('role','img');
         content.appendChild(clone);
         caption.textContent = label + ' — experimental / work-in-progress';
-        viewer.hidden = false;
-        viewer.setAttribute('aria-hidden','false');
+        page.hidden = false;
+        page.setAttribute('aria-hidden','false');
         document.body.style.overflow = 'hidden';
-        // focus for keyboard close
-        closeBtn.focus();
       }
 
-      function close(){
-        viewer.hidden = true;
-        viewer.setAttribute('aria-hidden','true');
+      function hide(){
+        page.hidden = true;
+        page.setAttribute('aria-hidden','true');
         content.innerHTML = '';
+        caption.textContent = '';
         document.body.style.overflow = '';
       }
 
-      document.querySelectorAll('.tile.open').forEach(tile=>{
-        tile.addEventListener('click', ()=> open(tile));
-      });
+      function route(){
+        const h = location.hash || '';
+        const m = h.match(/^#\/wip\/(\d+)/);
+        if(m){ show(m[1]); }
+        else hide();
+      }
 
-      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', close));
-      closeBtn.addEventListener('click', close);
-      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') close(); });
+      // click backdrop/back link to close
+      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', ()=> location.hash = ''));
+      document.querySelectorAll('.page-back').forEach(n=>n.addEventListener('click', ()=> setTimeout(()=>{ location.hash = '' },10) ));
+
+      window.addEventListener('hashchange', route);
+      // init
+      route();
     })();
   </script>
 </body>
