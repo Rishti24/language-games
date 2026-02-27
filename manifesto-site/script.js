@@ -1,0 +1,3 @@
+const btn=document.getElementById('threadBtn');const reveal=document.getElementById('threadReveal');let open=false;btn.addEventListener('click',()=>{open=!open;if(open){reveal.classList.add('open');reveal.textContent='It teases another sentence, then lets it go — the thread loops outward, not tied.'}else{reveal.classList.remove('open');reveal.textContent='…'}});
+// persistent unfinished ellipsis
+setInterval(()=>{if(!reveal.classList.contains('open')){reveal.textContent=reveal.textContent.length<6?reveal.textContent+'.':'.'}} ,700);

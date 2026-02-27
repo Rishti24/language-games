@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rishti — Design Narrative</title>
+  <style>
+    :root{
+      --bg-x: 50%;
+      --bg-y: 50%;
+      --accent: 220 14% 55%;
+      --muted: 220 12% 92%;
+      --text: 220 14% 8%;
+      --soft-shadow: 0 8px 24px rgba(12,18,30,0.12);
+      --layer-shadow: 0 16px 40px rgba(12,18,30,0.08);
+      --space: 56px;
+    }
+    /* slow shifting gradient background */
+    html,body{height:100%;}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:hsl(var(--text)); background:linear-gradient(180deg, hsl(var(--muted)) 0%, #fff 100%);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      --scroll:0;
+      overflow-y:scroll;
+    }
+    .canvas{
+      position:fixed; inset:0; z-index:-1; pointer-events:none; overflow:hidden;
+    }
+    .bg-layer{
+      position:absolute; inset:-20%;
+      background: radial-gradient(circle at var(--bg-x) var(--bg-y), rgba(184,200,255,0.18), transparent 25%), radial-gradient(circle at calc(100% - var(--bg-x)) calc(100% - var(--bg-y)), rgba(255,220,230,0.12), transparent 18%);
+      filter: blur(36px) saturate(110%);
+      transform: translate3d(calc((var(--mx,0) - 0.5) * 40px), calc((var(--my,0) - 0.5) * 40px), 0) scale(calc(1 + var(--scroll) * 0.02));
+      transition: transform 0.12s linear;
+      will-change: transform;
+      mix-blend-mode: normal;
+      opacity:calc(0.9 - var(--scroll) * 0.25);
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    @keyframes drift{
+      0% {transform: translate3d(-10px,-6px,0) scale(1)}
+      100% {transform: translate3d(10px,6px,0) scale(1.03)}
+    }
+
+    .wrap{max-width:1000px; margin:0 auto; padding:var(--space) 28px;}
+
+    header.hero{
+      padding:calc(var(--space) * 0.6) 0; display:flex; align-items:flex-start; gap:36px;
+    }
+    .hero .eyebrow{color:hsl(220 10% 55%); font-weight:600; letter-spacing:0.06em; text-transform:uppercase; font-size:12px}
+    .hero h1{font-size:48px; line-height:1.03; margin:8px 0 10px; font-weight:700; letter-spacing:-0.02em}
+    .lead{color:hsl(220 10% 36%); max-width:56ch; font-size:18px}
+
+    section{padding:60px 0;}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.8), rgba(245,247,250,0.8)); border-radius:14px; padding:28px; box-shadow:var(--soft-shadow);}
+
+    /* Values */
+    .values{display:grid; grid-template-columns:repeat(3,1fr); gap:24px}
+    .value{padding:28px; border-radius:12px; background:rgba(255,255,255,0.6); box-shadow:var(--soft-shadow)}
+    .value h3{margin:0 0 8px; font-size:16px}
+    .value p{margin:0; color:hsl(220 10% 45%)}
+
+    /* Material + Mechanism */
+    .hm{display:flex; gap:28px; align-items:stretch}
+    .material, .mechanism{flex:1}
+    .material .sample{height:160px; border-radius:12px; background:linear-gradient(135deg,#f8fafc,#eef2ff); box-shadow:var(--layer-shadow); display:flex; align-items:center; justify-content:center; color:hsl(220 10% 34%)}
+
+    /* Interaction Study */
+    .interaction-demo{display:flex; gap:20px; align-items:center}
+    .demo-plate{width:220px; height:120px; border-radius:12px; background:linear-gradient(180deg,#fff,#f3f6fb); box-shadow:var(--layer-shadow); display:flex; align-items:center; justify-content:center; font-weight:600}
+
+    /* Selected Experiments */
+    .samples{display:grid; grid-template-columns:repeat(4,1fr); gap:20px}
+    figure.sample-figure{background:#fff; padding:18px; border-radius:12px; box-shadow:var(--soft-shadow); display:flex; flex-direction:column; align-items:stretch}
+    .sample-visual{height:120px; border-radius:8px; background:linear-gradient(135deg,#efe9ff,#fff1ec); box-shadow:inset 0 -10px 24px rgba(0,0,0,0.04)}
+    figcaption{margin-top:12px; font-size:13px; color:hsl(220 10% 36%)}
+
+    footer{padding:40px 0; color:hsl(220 10% 50%); font-size:14px}
+
+    /* responsive */
+    @media (max-width:900px){
+      .values{grid-template-columns:1fr}
+      .hm{flex-direction:column}
+      .samples{grid-template-columns:repeat(2,1fr)}
+      .hero h1{font-size:36px}
+    }
+
+    /* subtle interaction focus */
+    .interactive-area{cursor:pointer; transition:transform .16s ease, box-shadow .16s ease}
+    .interactive-area:active{transform:translateY(2px); box-shadow:0 6px 18px rgba(12,18,30,0.12)}
+  </style>
+</head>
+<body>
+  <div class="canvas" aria-hidden="true">
+    <div class="bg-layer"></div>
+  </div>
+
+  <div class="wrap">
+    <header class="hero">
+      <div style="flex:1">
+        <div class="eyebrow">Design Narrative</div>
+        <h1>Rishti — Design Narrative</h1>
+        <p class="lead">A reflective study of emotional connection through material, mechanism, and tactile presence. This narrative explores how soft depth, measured motion, and layered materials form intimate moments of interaction.</p>
+      </div>
+      <div style="width:260px; align-self:flex-start">
+        <div class="card">
+          <strong>Quick Interaction</strong>
+          <p style="margin:10px 0 14px;color:hsl(220 10% 45%);">Move your pointer across the page to nudge the background’s luminous fields and reveal material depth.</p>
+          <div style="display:flex;gap:8px;align-items:center"><div style="width:10px;height:10px;border-radius:50%;background:linear-gradient(180deg,#6b8cff,#8ad4ff);box-shadow:0 6px 18px rgba(106,139,255,0.18)"></div><div style="font-size:13px;color:hsl(220 10% 40%)">Tactile field</div></div>
+        </div>
+      </div>
+    </header>
+
+    <section id="values">
+      <h2 style="margin-top:0">Values</h2>
+      <div class="values">
+        <div class="value">
+          <h3>Presence</h3>
+          <p>Design that invites attentive touch and sustained attention—measured, calm, and intentional.</p>
+        </div>
+        <div class="value">
+          <h3>Material Honesty</h3>
+          <p>Respect the properties of materials—weight, grain, friction—so interactions feel grounded and reliable.</p>
+        </div>
+        <div class="value">
+          <h3>Emotional Craft</h3>
+          <p>Small gestures tuned to human perception—soft timing, gentle relief, and quiet delight.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="material-mechanism">
+      <h2>Material + Mechanism</h2>
+      <div class="hm">
+        <div class="material card">
+          <h3>Material</h3>
+          <p style="color:hsl(220 10% 45%)">Layered textiles, warm ceramics, and soft polymers create a vocabulary of touch—contrasts of smooth and textured surfaces guide places to press, slide and cradle.</p>
+          <div class="sample" style="margin-top:18px">Material sample (tactile)</div>
+        </div>
+        <div class="mechanism card">
+          <h3>Mechanism</h3>
+          <p style="color:hsl(220 10% 45%)">Simple mechanical affordances—hinges, dampers, and elastic interactions—translated into subtle digital motion and haptic metaphor.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="interaction-study">
+      <h2>Interaction Study</h2>
+      <div class="card" style="display:flex;flex-direction:column;gap:18px">
+        <p style="margin:0;color:hsl(220 10% 45%)">An investigation of timing, feedback, and the felt continuity between finger and surface. The demo below is intentionally restrained—movement is slow, feedback is soft.</p>
+        <div class="interaction-demo">
+          <div class="demo-plate interactive-area" id="pressPlate">Press & Hold</div>
+          <div style="flex:1">
+            <p style="margin:0 0 8px;font-weight:600">Background Response</p>
+            <p style="margin:0;color:hsl(220 10% 45%)">Pointer position subtly shifts the luminous gradients behind content, creating a sense of layered depth and causal connection.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experiments">
+      <h2>Selected Experiments</h2>
+      <div class="samples">
+        <figure class="sample-figure">
+          <div class="sample-visual" style="background:linear-gradient(135deg,#f3f0ff,#fffaf0);display:flex;align-items:center;justify-content:center">Sample A</div>
+          <figcaption>Layered polymer + matte glaze — soft resilience</figcaption>
+        </figure>
+        <figure class="sample-figure">
+          <div class="sample-visual" style="background:linear-gradient(135deg,#fff7f3,#f2f9ff);display:flex;align-items:center;justify-content:center">Sample B</div>
+          <figcaption>Woven textile — directional friction</figcaption>
+        </figure>
+        <figure class="sample-figure">
+          <div class="sample-visual" style="background:linear-gradient(135deg,#f7fff6,#eef6ff);display:flex;align-items:center;justify-content:center">Sample C</div>
+          <figcaption>Pressed clay — warm thermal profile</figcaption>
+        </figure>
+        <figure class="sample-figure">
+          <div class="sample-visual" style="background:linear-gradient(135deg,#fff8f2,#f0f3ff);display:flex;align-items:center;justify-content:center">Sample D</div>
+          <figcaption>Paper composite — layered grain</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap">
+        <div>© Rishti — Design Narrative</div>
+        <div style="color:hsl(220 10% 45%);font-size:13px">A study in tactility, depth, and gentle motion.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // pointer-based subtle parallax for background
+    (function(){
+      const root = document.documentElement;
+      let w = window.innerWidth, h = window.innerHeight;
+      function onMove(e){
+        const x = (e.clientX || (e.touches && e.touches[0].clientX)) / w;
+        const y = (e.clientY || (e.touches && e.touches[0].clientY)) / h;
+        root.style.setProperty('--mx', x);
+        root.style.setProperty('--my', y);
+        root.style.setProperty('--bg-x', (x*100) + '%');
+        root.style.setProperty('--bg-y', (y*100) + '%');
+      }
+      function onResize(){ w = window.innerWidth; h = window.innerHeight; }
+      function onScroll(){
+        const s = Math.min(1, window.scrollY / (document.body.scrollHeight - h));
+        root.style.setProperty('--scroll', s);
+        // subtle hue shift with scroll
+        const hueShift = 6 * s;
+        document.querySelector('.bg-layer').style.filter = `blur(36px) saturate(110%) hue-rotate(${hueShift}deg)`;
+      }
+      window.addEventListener('mousemove', onMove, {passive:true});
+      window.addEventListener('touchmove', onMove, {passive:true});
+      window.addEventListener('resize', onResize);
+      window.addEventListener('scroll', onScroll, {passive:true});
+      onResize(); onScroll();
+
+      // small press interaction to accent the field
+      const plate = document.getElementById('pressPlate');
+      plate.addEventListener('pointerdown', ()=>{
+        document.querySelector('.bg-layer').style.transition = 'transform 0.28s cubic-bezier(.2,.9,.3,1), opacity 0.28s';
+        document.querySelector('.bg-layer').style.transform += ' scale(1.02)';
+      });
+      plate.addEventListener('pointerup', ()=>{
+        // reset by triggering scroll handler which re-applies scale
+        document.querySelector('.bg-layer').style.transform = '';
+        onScroll();
+      });
+    })();
+  </script>
+</body>
+</html>
