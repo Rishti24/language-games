@@ -24,9 +24,17 @@
     .tile{flex:1;min-height:96px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:transparent;position:relative;border:1px solid #eef3f8}
     .tile svg{width:100%;height:100%;display:block}
     .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:transparent;padding:4px 8px;color:#5b6b7a}
-    .tile .badge{position:absolute;right:8px;top:8px;font-size:11px;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.9);color:#111827;border:1px solid rgba(8,16,36,0.04);font-weight:600}
-    .tile:hover{transform:translateY(-6px) scale(1.02);transition:transform .28s cubic-bezier(.2,.9,.2,1)}
+    .tile .badge{position:absolute;right:8px;top:8px;font-size:11px;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#fff7ed,#fff1f2);color:#111827;border:1px solid rgba(8,16,36,0.04);font-weight:700;box-shadow:0 6px 18px rgba(16,24,40,0.08)}
+    .tile:hover{transform:translateY(-8px) scale(1.03);transition:transform .28s cubic-bezier(.2,.9,.2,1);box-shadow:0 22px 46px rgba(16,24,40,0.14)}
     .tile{transition:transform .28s ease,box-shadow .28s ease}
+
+    /* animated decorative blobs */
+    .blobs{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .blob{position:absolute;display:block;border-radius:50%;filter:blur(48px);mix-blend-mode:screen;opacity:0.95}
+    .blob.b1{width:420px;height:420px;left:-8%;top:8%;background:radial-gradient(circle at 30% 30%,#ff9a9e,#fbc2eb);animation:blobmove 18s ease-in-out infinite}
+    .blob.b2{width:520px;height:520px;right:-12%;top:18%;background:radial-gradient(circle at 30% 30%,#a18cd1,#fad0c4);animation:blobmove 22s ease-in-out infinite;animation-delay:2s}
+    .blob.b3{width:360px;height:360px;left:18%;bottom:-6%;background:radial-gradient(circle at 60% 40%,#ffd3a5,#fd6585);animation:blobmove 20s ease-in-out infinite;animation-delay:4s}
+    @keyframes blobmove{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-30px) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
 
     footer{font-size:12px;opacity:.72;text-align:center}
 
@@ -48,6 +56,11 @@
   </style>
 </head>
 <body>
+  <div class="blobs" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
   <main class="wrap panel" role="main">
     <section class="hero">
       <div style="display:flex;gap:12px;align-items:center">
@@ -56,6 +69,9 @@
       </div>
       <p class="sub">A simple, looping interface — a space that keeps a small gap open.</p>
       <p style="margin:.6rem 0 0 0;color:#6b7280;font-size:13px;opacity:.95">An experimental palette, intentionally incomplete — click any frame to explore an in-progress thought.</p>
+      <div style="margin-top:12px">
+        <button class="cta">Explore a loop</button>
+      </div>
     </section>
 
     <section class="gallery">
@@ -149,6 +165,9 @@
     .meta{font-size:12px;color:#6b7280;margin-top:8px}
     .tags{display:flex;gap:8px;margin-top:10px}
     .tag{font-size:11px;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#f3f4f6,#fff);border:1px solid rgba(8,16,36,0.04);color:#374151}
+    .tag.colored{background:linear-gradient(90deg,#ffd3a5,#ff9a9e);color:#1f2937;border:none}
+    .tag.colored:nth-child(2){background:linear-gradient(90deg,#a18cd1,#c7a3e6)}
+    .tag.colored:nth-child(3){background:linear-gradient(90deg,#a7f3d0,#60a5fa)}
   </style>
   <script>
     // tiny theme nudge: shift background colors slowly for variety
@@ -189,6 +208,21 @@
         const next = 380 + Math.floor(Math.random()*900);
         setTimeout(loop, next);
       })();
+    })();
+
+    // CTA pulse
+    (function(){
+      const cta = document.querySelector('.cta');
+      if(!cta) return;
+      cta.style.border = '1px solid rgba(8,16,36,0.06)';
+      cta.style.background = 'linear-gradient(90deg,#fff,#fff0)';
+      cta.style.padding = '8px 12px';
+      cta.style.borderRadius = '10px';
+      cta.style.cursor = 'pointer';
+      cta.style.fontWeight = '600';
+      cta.style.color = '#0f172a';
+      cta.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:2200,iterations:Infinity});
+      cta.addEventListener('click', ()=>{ const first = document.querySelector('.tile'); if(first) first.click(); });
     })();
 
     // small, continuous micro-movements on svg shapes to avoid neat repetition
@@ -247,7 +281,7 @@
         const p1 = document.createElement('p'); p1.textContent = 'Work in progress — slightly unfinished. Content arrives slowly.'; p1.className = 'reveal'; innerRight.appendChild(p1);
         // meta + tags
         const meta = document.createElement('div'); meta.className = 'meta reveal'; meta.textContent = 'Status: in-progress · Author: experimental'; innerRight.appendChild(meta);
-        const tags = document.createElement('div'); tags.className = 'tags reveal'; ['loop','draft','open'].forEach(t=>{ const s = document.createElement('span'); s.className='tag'; s.textContent=t; tags.appendChild(s)}); innerRight.appendChild(tags);
+        const tags = document.createElement('div'); tags.className = 'tags reveal'; ['loop','draft','open'].forEach((t,i)=>{ const s = document.createElement('span'); s.className='tag colored'; s.textContent=t; tags.appendChild(s)}); innerRight.appendChild(tags);
         const dots = document.createElement('div'); dots.className = 'reveal'; innerRight.appendChild(dots);
         const cont = document.createElement('button'); cont.textContent = 'continue'; cont.className = 'reveal'; cont.style.marginTop = '10px'; cont.style.padding = '8px 10px'; cont.style.border='1px solid rgba(8,16,36,0.06)'; cont.style.background='transparent'; cont.style.borderRadius='8px'; innerRight.appendChild(cont);
 
