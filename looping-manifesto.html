@@ -8,36 +8,35 @@
     :root{--bg1:#ff9a9e;--bg2:#fad0c4;--bg3:#a18cd1;--bg4:#fbc2eb;--accent:#0f172a}
     html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; color:var(--accent)}
     /* layered, slow-moving gradient to feel like an endless field */
-    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3));background-size:500% 500%;animation:shift 28s linear infinite;}
-    @keyframes shift{0%{background-position:0% 50%}25%{background-position:50% 30%}50%{background-position:100% 50%}75%{background-position:50% 70%}100%{background-position:0% 50%}}
+    /* flat background: subtle, no depth or heavy motion */
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fbfcfe,#f3f6fb);}
 
-    .wrap{width:min(980px,94vw);padding:4rem 2rem;display:flex;flex-direction:column;gap:2.5rem;backdrop-filter:blur(6px);border-radius:16px}
-    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0.32));padding:2.2rem;border-radius:12px;box-shadow:0 8px 36px rgba(8,16,40,0.12)}
+    .wrap{width:min(980px,94vw);padding:3.2rem 2rem;display:flex;flex-direction:column;gap:2rem;border-radius:6px}
+    /* very flat panel: subtle border, no shadows or blur */
+    .panel{background:#ffffff;padding:1.6rem;border-radius:6px;border:1px solid #e7ecf3}
 
     .hero{display:flex;flex-direction:column;gap:.6rem}
-    .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:700;margin:0;color:#081029;will-change:transform}
-    .title{animation:breathe 9s ease-in-out infinite}
-    @keyframes breathe{0%{transform:translateY(0) scale(1)}40%{transform:translateY(-4px) scale(1.01)}80%{transform:translateY(0) scale(1)}}
+    .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:700;margin:0;color:#081029}
 
     .sub{font-size:clamp(12px,2.2vw,16px);opacity:.78;margin:0}
     .sub .ellipsis{display:inline-block;min-width:5ch;opacity:.9}
 
     .gallery{display:flex;gap:14px;align-items:center}
-    .tile{flex:1;min-height:96px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,255,255,0.38),rgba(255,255,255,0.12));position:relative}
+    .tile{flex:1;min-height:96px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:transparent;position:relative;border:1px solid #eef3f8}
     .tile svg{width:100%;height:100%;display:block}
-    .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:rgba(255,255,255,0.55);padding:4px 8px;border-radius:6px}
+    .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:transparent;padding:4px 8px;color:#5b6b7a}
 
     footer{font-size:12px;opacity:.72;text-align:center}
 
-    /* tiles each have an out-of-sync motion to avoid neat looping */
+    /* keep micro-motion but very subtle for a flat aesthetic */
     .osc{animation:float linear infinite}
-    .tile:nth-child(1) .osc{animation-duration:5.9s}
-    .tile:nth-child(2) .osc{animation-duration:7.3s;animation-delay:0.4s}
-    .tile:nth-child(3) .osc{animation-duration:6.7s;animation-delay:1.1s}
-    @keyframes float{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-6px) rotate(.6deg)}50%{transform:translateY(0) rotate(0)}75%{transform:translateY(5px) rotate(-.6deg)}100%{transform:translateY(0) rotate(0)}}
+    .tile:nth-child(1) .osc{animation-duration:9.9s}
+    .tile:nth-child(2) .osc{animation-duration:11.3s;animation-delay:0.4s}
+    .tile:nth-child(3) .osc{animation-duration:10.7s;animation-delay:1.1s}
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-3px)}100%{transform:translateY(0)}}
 
-    /* faint looping outline that drifts across tiles */
-    .tile::before{content:"";position:absolute;inset:0;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);pointer-events:none}
+    /* flat tile outline */
+    .tile::before{content:"";position:absolute;inset:0;border-radius:8px;border:1px solid rgba(12,24,40,0.02);pointer-events:none}
 
     /* give a restless, never-resolving underline */
     .title .trail{display:inline-block;margin-left:.4ch;color:rgba(8,16,41,0.6)}
@@ -54,7 +53,7 @@
     </section>
 
     <section class="gallery">
-      <a class="tile" data-id="1" href="#/wip/1" aria-label="Open work in progress image 1">
+      <a class="tile" data-id="1" data-side="true" href="#/wip/1" aria-label="Open work in progress image 1">
         <svg id="svg1" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc">
           <defs>
             <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff9a9e"/><stop offset="1" stop-color="#fbc2eb"/></linearGradient>
@@ -72,7 +71,7 @@
         <div class="label">WIP — Loop Study</div>
       </a>
 
-      <a class="tile" data-id="2" href="#/wip/2" aria-label="Open work in progress image 2">
+      <a class="tile" data-id="2" data-side="true" href="#/wip/2" aria-label="Open work in progress image 2">
         <svg id="svg2" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:0.4s">
           <defs>
             <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#a18cd1"/><stop offset="1" stop-color="#fad0c4"/></linearGradient>
@@ -90,7 +89,7 @@
         <div class="label">WIP — Interface Sketch</div>
       </a>
 
-      <a class="tile" data-id="3" href="#/wip/3" aria-label="Open work in progress image 3">
+      <a class="tile" data-id="3" data-side="true" href="#/wip/3" aria-label="Open work in progress image 3">
         <svg id="svg3" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:1.1s">
           <defs>
             <linearGradient id="g3" x1="0" x2="1"><stop offset="0" stop-color="#ffd3a5"/><stop offset="1" stop-color="#fd6585"/></linearGradient>
@@ -126,13 +125,23 @@
 
   <style>
     /* viewer styles (kept in-page for single-file deliverable) */
+    /* page viewer used when opening full-screen; keep flat colors */
     .page{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
-    .page-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.64);backdrop-filter:blur(4px)}
+    .page-backdrop{position:absolute;inset:0;background:rgba(2,6,23,0.48)}
     .page-frame{position:relative;max-width:94vw;max-height:92vh;padding:18px;display:flex;flex-direction:column;gap:12px;align-items:center}
-    .page-content{background:transparent;border-radius:8px;overflow:auto;display:flex;align-items:center;justify-content:center}
-    .page-content svg{box-shadow:0 20px 60px rgba(2,6,23,0.28);border-radius:8px;display:block;width:100%;height:auto}
-    .page-caption{color:#fff;font-size:13px;opacity:0.95}
-    .page-back{position:absolute;left:18px;top:18px;color:#fff;background:rgba(255,255,255,0.06);padding:6px 10px;border-radius:8px;text-decoration:none}
+    .page-content{background:transparent;border-radius:6px;overflow:auto;display:flex;align-items:center;justify-content:center}
+    .page-content svg{border-radius:6px;display:block;width:100%;height:auto}
+    .page-caption{color:#081029;font-size:13px;opacity:0.9}
+    .page-back{position:absolute;left:18px;top:18px;color:#081029;background:transparent;padding:6px 10px;border-radius:6px;text-decoration:none;border:1px solid #e7ecf3}
+
+    /* side tab: small flat drawer */
+    .side{position:fixed;right:0;top:0;height:100vh;width:340px;background:#ffffff;border-left:1px solid #e7ecf3;transform:translateX(100%);transition:transform .28s ease;z-index:1500;display:flex;flex-direction:column}
+    .side.open{transform:translateX(0)}
+    .side-header{padding:12px 14px;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between}
+    .side-title{font-weight:600;color:#081029}
+    .side-close{background:transparent;border:0;padding:8px;color:#5b6b7a}
+    .side-body{padding:12px 14px;overflow:auto;flex:1}
+    .side-body svg{width:100%;height:auto;display:block}
   </style>
   <script>
     // tiny theme nudge: shift background colors slowly for variety
@@ -190,27 +199,63 @@
         })();
       });
     })();
-    // in-site page routing: use hash (#/wip/1) to open a full-screen page (keeps single-file site)
+    // in-site page routing: use hash (#/wip/1) to open a full-screen page or side tab for tiles
     (function(){
       const page = document.getElementById('page');
       const content = document.getElementById('page-content');
       const caption = document.getElementById('page-caption');
+      const side = createSide();
 
-      function show(id){
+      function createSide(){
+        const s = document.createElement('aside');
+        s.id = 'side'; s.className = 'side'; s.setAttribute('aria-hidden','true');
+        s.innerHTML = `
+          <div class="side-header"><div class="side-title" id="side-title"></div><button class="side-close" id="side-close">✕</button></div>
+          <div class="side-body" id="side-body"></div>
+        `;
+        document.body.appendChild(s);
+        s.querySelector('#side-close').addEventListener('click', ()=> { closeSide(); history.replaceState(null,'', location.pathname + location.search + '#'); });
+        return s;
+      }
+
+      function openSide(id){
         const tile = document.querySelector(`.tile[data-id="${id}"]`);
-        if(!tile) return hide();
+        if(!tile) return;
         const svg = tile.querySelector('svg');
         const label = tile.querySelector('.label')?.textContent || '';
-        content.innerHTML = '';
-        // clone svg and ensure it scales crisply
+        const body = document.getElementById('side-body');
+        const title = document.getElementById('side-title');
+        body.innerHTML = '';
         const clone = svg.cloneNode(true);
         clone.removeAttribute('preserveAspectRatio');
         clone.setAttribute('preserveAspectRatio','xMidYMid meet');
-        clone.style.width = '';
-        clone.style.height = '';
+        clone.style.width = '100%';
+        clone.style.height = 'auto';
+        body.appendChild(clone);
+        title.textContent = label;
+        side.classList.add('open');
+        side.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeSide(){
+        side.classList.remove('open');
+        side.setAttribute('aria-hidden','true');
+        document.getElementById('side-body').innerHTML = '';
+        document.body.style.overflow = '';
+      }
+
+      function showPage(id){
+        const tile = document.querySelector(`.tile[data-id="${id}"]`);
+        if(!tile) return hidePage();
+        const svg = tile.querySelector('svg');
+        const label = tile.querySelector('.label')?.textContent || '';
+        content.innerHTML = '';
+        const clone = svg.cloneNode(true);
+        clone.removeAttribute('preserveAspectRatio');
+        clone.setAttribute('preserveAspectRatio','xMidYMid meet');
         clone.style.maxWidth = '92vw';
         clone.style.maxHeight = '78vh';
-        clone.setAttribute('role','img');
         content.appendChild(clone);
         caption.textContent = label + ' — experimental / work-in-progress';
         page.hidden = false;
@@ -218,7 +263,7 @@
         document.body.style.overflow = 'hidden';
       }
 
-      function hide(){
+      function hidePage(){
         page.hidden = true;
         page.setAttribute('aria-hidden','true');
         content.innerHTML = '';
@@ -229,13 +274,37 @@
       function route(){
         const h = location.hash || '';
         const m = h.match(/^#\/wip\/(\d+)/);
-        if(m){ show(m[1]); }
-        else hide();
+        if(m){
+          const id = m[1];
+          const tile = document.querySelector(`.tile[data-id="${id}"]`);
+          if(tile && tile.dataset.side === 'true'){
+            openSide(id);
+            // keep hash in URL for linkability
+          } else {
+            showPage(id);
+          }
+        } else {
+          hidePage();
+          closeSide();
+        }
       }
 
-      // click backdrop/back link to close
+      // close when clicking backdrop or back link
       document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', ()=> location.hash = ''));
       document.querySelectorAll('.page-back').forEach(n=>n.addEventListener('click', ()=> setTimeout(()=>{ location.hash = '' },10) ));
+
+      // intercept tile clicks to open side immediately (prevents navigation jump)
+      document.querySelectorAll('.tile').forEach(tile =>{
+        tile.addEventListener('click', (ev)=>{
+          const id = tile.dataset.id;
+          if(tile.dataset.side === 'true'){
+            ev.preventDefault();
+            // update hash for shareability
+            location.hash = `/wip/${id}`;
+            // route handler will open the side
+          }
+        });
+      });
 
       window.addEventListener('hashchange', route);
       // init
