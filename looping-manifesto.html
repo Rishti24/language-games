@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Looping — Manifesto</title>
+  <style>
+    :root{--bg1:#ff9a9e;--bg2:#fad0c4;--bg3:#a18cd1;--bg4:#fbc2eb;--accent:#0f172a}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; color:var(--accent)}
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3));background-size:400% 400%;animation:shift 12s ease-in-out infinite;}
+    @keyframes shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    .wrap{width:min(980px,94vw);padding:4rem 2rem;display:flex;flex-direction:column;gap:2.5rem;backdrop-filter:blur(6px);border-radius:16px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.35));padding:2.2rem;border-radius:12px;box-shadow:0 6px 28px rgba(16,24,40,0.12)}
+
+    .hero{display:flex;flex-direction:column;gap:.5rem}
+    .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:700;margin:0;color:#081029}
+    .sub{font-size:clamp(12px,2.2vw,16px);opacity:.75;margin:0}
+
+    .gallery{display:flex;gap:14px;align-items:center}
+    .tile{flex:1;min-height:90px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,255,255,0.4),rgba(255,255,255,0.15));position:relative}
+    .tile svg{width:100%;height:100%;display:block}
+    .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:rgba(255,255,255,0.55);padding:4px 8px;border-radius:6px}
+
+    footer{font-size:12px;opacity:.7;text-align:center}
+
+    /* subtle loop motion for svgs */
+    .osc{animation:float 6s ease-in-out infinite}
+    @keyframes float{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-6px) rotate(1deg)}100%{transform:translateY(0) rotate(0)}}
+
+    /* accessibility: respect user motion */
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+</head>
+<body>
+  <main class="wrap panel" role="main">
+    <section class="hero">
+      <h1 class="title">It continues, slightly unfinished.</h1>
+      <p class="sub">A simple, looping interface — a space that keeps a small gap open.</p>
+    </section>
+
+    <section class="gallery">
+      <div class="tile" aria-hidden="true">
+        <svg viewBox="0 0 200 100" preserveAspectRatio="none" class="osc">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff9a9e"/><stop offset="1" stop-color="#fbc2eb"/></linearGradient>
+          </defs>
+          <rect width="200" height="100" fill="url(#g1)"/>
+          <g fill-opacity=".12">
+            <circle cx="40" cy="60" r="36" fill="#ffffff" />
+          </g>
+        </svg>
+        <div class="label">Loop 01</div>
+      </div>
+
+      <div class="tile" aria-hidden="true">
+        <svg viewBox="0 0 200 100" preserveAspectRatio="none" class="osc" style="animation-delay:0.8s">
+          <defs>
+            <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#a18cd1"/><stop offset="1" stop-color="#fad0c4"/></linearGradient>
+          </defs>
+          <rect width="200" height="100" fill="url(#g2)"/>
+          <g fill-opacity=".10">
+            <rect x="80" y="12" width="84" height="84" rx="18" fill="#ffffff" />
+          </g>
+        </svg>
+        <div class="label">Loop 02</div>
+      </div>
+
+      <div class="tile" aria-hidden="true">
+        <svg viewBox="0 0 200 100" preserveAspectRatio="none" class="osc" style="animation-delay:1.6s">
+          <defs>
+            <linearGradient id="g3" x1="0" x2="1"><stop offset="0" stop-color="#ffd3a5"/><stop offset="1" stop-color="#fd6585"/></linearGradient>
+          </defs>
+          <rect width="200" height="100" fill="url(#g3)"/>
+          <g fill-opacity=".09">
+            <path d="M30 70c20-40 80-40 110 0" fill="#fff"/>
+          </g>
+        </svg>
+        <div class="label">Loop 03</div>
+      </div>
+    </section>
+
+    <footer>
+      <small>Manifesto-inspired interface — intentionally leaving space.</small>
+    </footer>
+  </main>
+
+  <script>
+    // tiny theme nudge: shift background colors slowly for variety
+    (function(){
+      const body = document.body;
+      let t=0;
+      function tick(){
+        t+=0.0025;
+        const a = Math.sin(t)*0.5+0.5; // 0..1
+        const b = Math.cos(t*0.7)*0.5+0.5;
+        body.style.setProperty('--bg1', `hsl(${200 + a*60}deg 85% 75%)`);
+        body.style.setProperty('--bg3', `hsl(${260 + b*40}deg 60% 70%)`);
+        requestAnimationFrame(tick);
+      }
+      if(window.matchMedia('(prefers-reduced-motion: no-preference)').matches){requestAnimationFrame(tick)}
+    })();
+  </script>
+</body>
+</html>
