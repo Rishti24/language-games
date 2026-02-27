@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 100">
+  <g transform="translate(10,30)">
+    <rect x="0" y="10" width="180" height="34" rx="16" fill="#f6d9b6" />
+    <rect x="0" y="0" width="180" height="20" rx="12" fill="#8b4b3e" />
+    <ellipse cx="30" cy="36" rx="10" ry="6" fill="#f2caa1" />
+  </g>
+</svg>

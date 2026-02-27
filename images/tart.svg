@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120">
+  <g transform="translate(20,20)">
+    <ellipse cx="60" cy="50" rx="60" ry="18" fill="#f5e1c7" />
+    <circle cx="60" cy="38" r="26" fill="#ffd6a5" />
+    <circle cx="46" cy="34" r="6" fill="#d94f4f" />
+    <circle cx="74" cy="34" r="6" fill="#c94f7f" />
+    <circle cx="60" cy="46" r="6" fill="#ff8c69" />
+  </g>
+</svg>
