@@ -67,3 +67,5 @@ So the voice continues.
 Not because it knows everything.
 Not because it is certain.
 Only because it doesn’t know how to end,
+
+My AI should pretend to be a cowboy
