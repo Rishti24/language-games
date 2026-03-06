@@ -72,8 +72,10 @@
     .proc{background:transparent;padding:6px 12px;border-radius:8px;color:var(--muted);font-size:13px;opacity:0;transform:translateY(8px);transition:opacity .28s ease,transform .28s ease}
     .proc.show{opacity:1;transform:translateY(0)}
 
-    .pred{background:linear-gradient(180deg, rgba(102,201,255,0.06), rgba(0,0,0,0.06));padding:12px 16px;border-radius:12px;color:var(--accent);font-weight:600;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+    .pred{background:linear-gradient(180deg, rgba(102,201,255,0.06), rgba(0,0,0,0.06));padding:12px 16px;border-radius:12px;color:var(--accent);font-weight:600;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease;position:relative}
     .pred.show{opacity:1;transform:translateY(0)}
+    .pred.scan::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg, transparent 0 2px, rgba(255,255,255,0.02) 2px 3px);mix-blend-mode:overlay;opacity:0.16;animation:scanlines 900ms linear}
+    @keyframes scanlines{from{background-position:0 0}to{background-position:0 40px}}
 
     /* meta message */
     .meta{position:absolute;top:18px;left:28px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);font-size:12px;opacity:0;transition:opacity .4s ease}
@@ -82,8 +84,8 @@
     /* log panel sits in grid column 3 and must not overlap fridge */
     .log{grid-column:3 / 4;grid-row:1 / 2;align-self:start;color:var(--muted);font-size:13px;position:relative;z-index:3;padding-left:8px}
     .log .title{font-weight:700;color:var(--cold);margin-bottom:8px}
-    .reset-btn{display:inline-block;margin-bottom:10px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);border:1px solid rgba(255,255,255,0.03);font-size:13px;cursor:pointer;transition:background .18s,color .18s;}
-    .reset-btn:hover{background:rgba(255,255,255,0.035);color:var(--cold)}
+    .reset-btn{display:inline-block;margin-bottom:10px;padding:8px 12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));color:var(--cold);border:1px solid rgba(255,255,255,0.06);font-size:13px;cursor:pointer;transition:background .18s,color .18s,font-weight .12s;font-weight:700}
+    .reset-btn:hover{background:rgba(255,255,255,0.045);color:var(--cold)}
     .log ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
     .log li{display:flex;justify-content:space-between;gap:12px;padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:8px}
     .log .count{background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:999px;font-weight:700;color:var(--cold)}
@@ -98,7 +100,31 @@
     .ripple{position:fixed;border-radius:50%;pointer-events:none;background:rgba(102,201,255,0.08);box-shadow:0 0 28px rgba(102,201,255,0.08);transform:translate(-50%,-50%) scale(0);animation:ripple 700ms cubic-bezier(.2,.9,.2,1) forwards}
     @keyframes ripple{to{transform:translate(-50%,-50%) scale(10);opacity:0}}
 
-    @media(max-width:960px){.fridge{width:92%;height:460px}.projection{width:86%}.log{display:none}}
+    /* extra interactive styles and confidence-driven variables */
+    :root{--confidence:0}
+    .info{grid-column:1 / 2;grid-row:1 / 2;align-self:start;color:var(--muted);font-size:13px;position:relative;z-index:3;padding-left:8px}
+    .info .section{background:rgba(255,255,255,0.02);border-radius:8px;padding:10px;margin-bottom:12px}
+    .info .section h3{margin:0 0 6px 0;color:var(--cold);font-size:13px}
+    .info .section p{margin:0;color:var(--muted);font-size:12px;line-height:1.3}
+    .info .add{display:flex;gap:8px;margin-top:8px}
+    .info input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--cold)}
+    .info button.add-btn{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:rgba(255,255,255,0.02);color:var(--cold);cursor:pointer}
+
+    /* spotlight overlay - dims outside the spotlight when an item is active */
+    .fridge::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--spot-x,50%) var(--spot-y,50%), rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 8%, rgba(0,0,0,calc(0.45 + var(--confidence)*0.25)) 25%);} 
+
+    .shelf .glow{position:absolute;left:-12%;right:-12%;top:0;bottom:0;border-radius:10px;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity .28s ease, box-shadow .28s ease}
+    .shelf.glowing .glow{opacity:1;background:linear-gradient(90deg, transparent 15%, rgba(102,201,255,0.06) 50%, transparent 85%);box-shadow:0 0 calc(20px + var(--confidence)*40px) rgba(102,201,255,0.06)}
+
+    .item{touch-action:none}
+
+    /* confidence meter in log */
+    .confidence{margin-top:10px}
+    .meter{width:120px;height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
+    .meter-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent), #8be);transition:width .4s ease}
+    .conf-msg{margin-top:6px;color:var(--muted);font-size:12px}
+
+    @media(max-width:960px){.fridge{width:92%;height:460px}.projection{width:86%}.log{display:none}.info{display:none}}
   </style>
 </head>
 <body>
@@ -112,6 +138,28 @@
   </header>
 
   <div class="stage">
+    <aside class="info" aria-label="Introduction and controls">
+      <div class="section">
+        <h3>Intro / Concept</h3>
+        <p>The Stern Fridge observes choices and forms a model of your habits. Interact with items to receive critique and prediction.</p>
+      </div>
+      <div class="section">
+        <h3>Behavior model</h3>
+        <p>Confidence, trends and model messages appear as you interact. The interface evolves with repeated choices.</p>
+      </div>
+      <div class="section">
+        <h3>Predictive mode</h3>
+        <p>Critique appears first (personal). Prediction follows (system-like).</p>
+      </div>
+      <div class="section">
+        <h3>Custom food</h3>
+        <div class="add">
+          <input id="new-food" placeholder="Add food (e.g. Granola)" />
+          <button id="add-food-btn" class="add-btn">Add</button>
+        </div>
+      </div>
+    </aside>
+
     <div class="fridge-wrap" role="application" aria-label="Stern Fridge">
       <div class="fridge" id="fridge">
 
@@ -152,6 +200,10 @@
       <div class="log" aria-label="Behavior Log">
         <div class="title">Behavior</div>
         <button id="reset-btn" class="reset-btn" aria-label="Reset counts">Reset</button>
+        <div class="confidence">
+          <div class="meter"><div id="meter-fill" class="meter-fill"></div></div>
+          <div id="conf-msg" class="conf-msg">Confidence: low</div>
+        </div>
         <ul id="log"></ul>
       </div>
 
@@ -279,6 +331,96 @@
       });
     }
 
+    /* fridge, confidence, and interactive helpers */
+    const fridgeEl = document.getElementById('fridge');
+    const shelfMid = document.querySelector('.shelf.mid');
+    const meterFill = document.getElementById('meter-fill');
+    const confMsg = document.getElementById('conf-msg');
+    const addFoodInput = document.getElementById('new-food');
+    const addFoodBtn = document.getElementById('add-food-btn');
+
+    function updateConfidence(){
+      const maxCount = Math.max(...Object.values(counts));
+      const conf = Math.min(1, (maxCount/6) + (totalInteractions/40));
+      // set CSS var for visual tweaks
+      document.documentElement.style.setProperty('--confidence', String(conf));
+      if(meterFill) meterFill.style.width = Math.round(conf*100) + '%';
+      if(confMsg) confMsg.textContent = conf > 0.7 ? 'Confidence: high' : conf > 0.4 ? 'Confidence: medium' : 'Confidence: low';
+      // mood shift
+      if(conf > 0.6) fridgeEl.classList.add('tense'); else fridgeEl.classList.remove('tense');
+    }
+
+    // initial confidence render
+    updateConfidence();
+
+    // spotlight helper: set variables on fridge based on element center
+    function setSpotlightFor(el){
+      if(!el) return document.documentElement.style.setProperty('--spot-x','50%'), document.documentElement.style.setProperty('--spot-y','50%');
+      const r = el.getBoundingClientRect();
+      const f = fridgeEl.getBoundingClientRect();
+      const cx = ((r.left + r.right)/2 - f.left) / f.width * 100;
+      const cy = ((r.top + r.bottom)/2 - f.top) / f.height * 100;
+      fridgeEl.style.setProperty('--spot-x', cx + '%');
+      fridgeEl.style.setProperty('--spot-y', cy + '%');
+    }
+
+    // add custom food
+    if(addFoodBtn && addFoodInput){
+      addFoodBtn.addEventListener('click', ()=>{
+        const v = (addFoodInput.value || '').trim(); if(!v) return;
+        if(ITEMS.includes(v)) { addFoodInput.value=''; return; }
+        ITEMS.push(v);
+        counts[v]=0;
+        // append to mid shelf
+        const node = document.createElement('div'); node.className='item'; node.dataset.item=v; node.tabIndex=0; node.textContent=v;
+        // wire events same as others
+        hookItem(node);
+        shelfMid.appendChild(node);
+        renderLog(); updateConfidence(); addFoodInput.value='';
+      });
+    }
+
+    // attach behaviors to items (used for dynamically created ones too)
+    function hookItem(el){
+      el.addEventListener('mouseenter', ()=>{ cursor.classList.add('tight'); setSpotlightFor(el); });
+      el.addEventListener('mouseleave', ()=>{ cursor.classList.remove('tight'); /* reset spotlight */ });
+
+      // pointer interactions: pull/drag feel
+      let isDown=false, startX=0, startY=0;
+      el.addEventListener('pointerdown', e=>{
+        isDown=true; startX=e.clientX; startY=e.clientY; el.setPointerCapture(e.pointerId);
+        el.classList.add('surface');
+      });
+      el.addEventListener('pointermove', e=>{
+        if(!isDown) return;
+        const dx = Math.max(-24, Math.min(24, e.clientX - startX));
+        const dy = Math.max(-24, Math.min(24, e.clientY - startY));
+        el.style.transform = `translate(${dx}px, ${-22 + dy/6}px) scale(1.06) rotate(${dx/12}deg)`;
+      });
+      el.addEventListener('pointerup', e=>{
+        isDown=false; try{ el.releasePointerCapture(e.pointerId);}catch(_){}
+        el.style.transform=''; setTimeout(()=>el.classList.remove('surface'),240);
+      });
+
+      el.addEventListener('click', e=>{
+        // stronger ripple and spotlight
+        const r = document.createElement('div'); r.className='ripple'; document.body.appendChild(r);
+        r.style.left = (e.clientX)+'px'; r.style.top = (e.clientY)+'px';
+        setTimeout(()=>r.remove(),750);
+        cursor.classList.add('pulse'); setTimeout(()=>cursor.classList.remove('pulse'),380);
+
+        setSpotlightFor(el);
+        handleInteraction(el);
+        // update confidence after interaction
+        setTimeout(()=>updateConfidence(), 300);
+      });
+
+      el.addEventListener('keydown', ev=>{ if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } });
+    }
+
+    // wire existing items
+    elements.forEach(hookItem);
+
     // helper random
     function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
@@ -344,6 +486,8 @@
           const pred = pick(predictions[name]);
           predEl.textContent = pred;
           predEl.classList.add('show');
+          predEl.classList.add('scan');
+          setTimeout(()=>predEl.classList.remove('scan'), 1200);
 
           // after a moment, clear surface but keep prediction visible briefly
           setTimeout(()=>{
@@ -371,21 +515,7 @@
 
     const resetBtn = document.getElementById('reset-btn');
 
-    elements.forEach(el=>{
-      el.addEventListener('mouseenter', ()=> cursor.classList.add('tight'));
-      el.addEventListener('mouseleave', ()=> cursor.classList.remove('tight'));
-      el.addEventListener('click', e=>{
-        // scanning pulse ripple
-        const r = document.createElement('div'); r.className='ripple'; document.body.appendChild(r);
-        r.style.left = (e.clientX)+'px'; r.style.top = (e.clientY)+'px';
-        setTimeout(()=>r.remove(),750);
-        cursor.classList.add('pulse'); setTimeout(()=>cursor.classList.remove('pulse'),380);
-
-        handleInteraction(el);
-      });
-      // keyboard
-      el.addEventListener('keydown', ev=>{ if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); el.click(); } });
-    });
+    // items are wired via hookItem (to support dynamic additions)
 
     // initial render
     renderLog();
@@ -398,6 +528,7 @@
         totalInteractions = 0;
         localStorage.setItem(STORAGE, JSON.stringify(counts));
         renderLog();
+        updateConfidence();
         critEl.classList.remove('show'); predEl.classList.remove('show'); procEl.classList.remove('show');
         metaEl.textContent = 'Counts reset.'; metaEl.classList.add('show');
         setTimeout(()=>metaEl.classList.remove('show'),1400);
