@@ -22,11 +22,18 @@
 
     /* Fridge */
     .fridge-wrap{display:flex;gap:18px;align-items:flex-start}
-    .fridge{width:560px;border-radius:8px;padding:18px;background:linear-gradient(180deg,var(--fridge-body),#0f1a20);box-shadow:0 20px 60px rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.03);position:relative}
+    .fridge{width:560px;border-radius:8px;padding:18px;background:linear-gradient(180deg,var(--fridge-body),#0f1a20);box-shadow:0 20px 60px rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.03);position:relative;overflow:visible}
     .fridge .door-edge{position:absolute;left:-18px;top:12px;width:18px;height:calc(100% - 24px);background:linear-gradient(180deg,#000,#0b1114);border-radius:4px}
     .interior{border-radius:6px;padding:14px;background:linear-gradient(180deg,rgba(15,34,54,0.16),rgba(8,22,34,0.28));min-height:420px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden}
-    .fridge .light{position:absolute;left:50%;transform:translateX(-50%);top:10px;width:60%;height:200px;background:radial-gradient(circle at 50% 10%,rgba(159,207,246,0.14),transparent 40%);filter:blur(12px);transition:opacity .28s ease;opacity:.6}
-    .fridge.lit .light{opacity:1}
+    .fridge .light{position:absolute;left:50%;transform:translateX(-50%);top:10px;width:60%;height:200px;background:radial-gradient(circle at 50% 10%,rgba(159,207,246,0.12),transparent 40%);filter:blur(12px);transition:opacity .28s ease, filter .28s ease;opacity:.18}
+    .fridge.open .light{opacity:0.9;filter:blur(14px)}
+    .fridge.lit .light{opacity:1;filter:blur(18px)}
+
+    /* Door overlay for closed-to-open animation */
+    .door{position:absolute;top:12px;left:18px;right:18px;bottom:12px;border-radius:6px;background:linear-gradient(180deg,#071218,#08151a);box-shadow:0 18px 40px rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;transition:transform .7s cubic-bezier(.2,.9,.19,1),opacity .4s ease;z-index:8}
+    .door .handle{width:72px;height:14px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
+    .fridge.open .door{transform:translateX(-120%);opacity:0}
+    .fridge.closed .light{opacity:0.12}
 
     .shelf{height:92px;display:flex;align-items:center;gap:14px;padding:8px;border-top:1px solid var(--glass);border-bottom:1px solid rgba(255,255,255,0.02)}
     .shelf.top{height:76px}
@@ -73,12 +80,19 @@
             <div class="item" data-id="leftovers" tabindex="0"><div class="name">Leftovers</div><div class="meta">tupperware</div></div>
           </div>
         </div>
+        <div class="door" id="door">
+          <div class="handle" id="handle" role="button" tabindex="0">Open — The Stern Fridge</div>
+        </div>
       </div>
 
       <div class="fridge-wrap">
         <div class="response" id="response">
           <div class="observation" id="obs">Select an item.</div>
           <div class="prediction" id="pred">A quiet record will be kept.</div>
+          <div style="width:100%;margin-top:8px;display:flex;gap:8px;align-items:center">
+            <input id="free-input" placeholder="Type a food (optional)" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);outline:none;font-size:13px" />
+            <button id="free-btn" style="padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:var(--text);cursor:pointer">Judge</button>
+          </div>
         </div>
 
         <div class="log" id="log">
@@ -109,7 +123,7 @@
         coke:["Third Coke today.","Another carbonated choice."],
         icecream:["The ice cream is disappearing faster this week.","A cold concession."],
         spinach:["A quiet, disciplined leaf.","Green but neglected."],
-        leftover:["Leftovers hold last week's decisions.","A measured reuse."],
+        leftovers:["Leftovers hold last week's decisions.","A measured reuse."],
         chocolate:["You seem to prefer sugar over restraint.","A controlled indulgence."],
         yogurt:["Yogurt—constituted moderation.","A tidy, predictable choice."]
       };
@@ -118,10 +132,13 @@
         coke:["The pattern is becoming easy to predict.","You will notice it again tomorrow."],
         icecream:["It will be gone before dinner.","Spoonfuls will accelerate."],
         spinach:["It may be forgotten until wilted.","A salad might redeem it later."],
-        leftover:["Reheated recollections await.","It will return, unchanged."],
+        leftovers:["Reheated recollections await.","It will return, unchanged."],
         chocolate:["It will be justified as 'for sharing'.", "Small squares will multiply."],
         yogurt:["It will be consumed with quiet resolve.","A last-minute snack will claim it."]
       };
+
+      const genericObservations = ["An interesting consideration.","A deliberate, quiet thought."];
+      const genericPredictions = ["You may return for another snack later tonight.","A similar choice is likely tomorrow."];
 
       function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 
@@ -144,16 +161,38 @@
         updateCountsUI();
 
         // intensify light briefly
+        fridge.classList.add('open');
         fridge.classList.add('lit');
-        setTimeout(()=>fridge.classList.remove('lit'),600);
+        // Keep lit state slightly longer when selecting
+        setTimeout(()=>fridge.classList.remove('lit'),900);
 
         // show observation then prediction
-        const o = observations[id] ? pick(observations[id]) : "A choice noted.";
-        const p = predictions[id] ? pick(predictions[id]) : "The system files this pattern.";
+        const o = observations[id] ? pick(observations[id]) : pick(genericObservations);
+        const p = predictions[id] ? pick(predictions[id]) : pick(genericPredictions);
         obs.textContent = o;
         pred.textContent = p;
         response.classList.add('visible');
       }
+
+      // Handle door opening via handle
+      const handle = document.getElementById('handle');
+      handle.addEventListener('click',()=>{fridge.classList.remove('closed');fridge.classList.add('open');});
+      handle.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); fridge.classList.remove('closed');fridge.classList.add('open'); }});
+
+      // Free-text judge input
+      const freeInput = document.getElementById('free-input');
+      const freeBtn = document.getElementById('free-btn');
+      function handleFree(){
+        const v = (freeInput.value||"").trim();
+        if(!v) return;
+        fridge.classList.add('open','lit'); setTimeout(()=>fridge.classList.remove('lit'),900);
+        obs.textContent = pick([`Thinking of ${v}?`, pick(genericObservations)]);
+        pred.textContent = pick(genericPredictions);
+        response.classList.add('visible');
+        freeInput.value='';
+      }
+      freeBtn.addEventListener('click',handleFree);
+      freeInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ handleFree(); } });
 
       itemsEl.forEach(el=>{
         el.addEventListener('click',()=>handleSelect(el));
