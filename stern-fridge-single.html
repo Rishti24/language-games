@@ -82,6 +82,8 @@
     /* log panel sits in grid column 3 and must not overlap fridge */
     .log{grid-column:3 / 4;grid-row:1 / 2;align-self:start;color:var(--muted);font-size:13px;position:relative;z-index:3;padding-left:8px}
     .log .title{font-weight:700;color:var(--cold);margin-bottom:8px}
+    .reset-btn{display:inline-block;margin-bottom:10px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);border:1px solid rgba(255,255,255,0.03);font-size:13px;cursor:pointer;transition:background .18s,color .18s;}
+    .reset-btn:hover{background:rgba(255,255,255,0.035);color:var(--cold)}
     .log ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
     .log li{display:flex;justify-content:space-between;gap:12px;padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:8px}
     .log .count{background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:999px;font-weight:700;color:var(--cold)}
@@ -149,6 +151,7 @@
       <!-- behavior log panel (outside and to the right) -->
       <div class="log" aria-label="Behavior Log">
         <div class="title">Behavior</div>
+        <button id="reset-btn" class="reset-btn" aria-label="Reset counts">Reset</button>
         <ul id="log"></ul>
       </div>
 
@@ -366,6 +369,8 @@
     });
     document.addEventListener('mouseenter', ()=>cursor.style.opacity = 1);
 
+    const resetBtn = document.getElementById('reset-btn');
+
     elements.forEach(el=>{
       el.addEventListener('mouseenter', ()=> cursor.classList.add('tight'));
       el.addEventListener('mouseleave', ()=> cursor.classList.remove('tight'));
@@ -384,6 +389,20 @@
 
     // initial render
     renderLog();
+
+    // reset handler
+    if(resetBtn){
+      resetBtn.addEventListener('click', ()=>{
+        if(!confirm('Reset all counts to zero?')) return;
+        ITEMS.forEach(k=>counts[k]=0);
+        totalInteractions = 0;
+        localStorage.setItem(STORAGE, JSON.stringify(counts));
+        renderLog();
+        critEl.classList.remove('show'); predEl.classList.remove('show'); procEl.classList.remove('show');
+        metaEl.textContent = 'Counts reset.'; metaEl.classList.add('show');
+        setTimeout(()=>metaEl.classList.remove('show'),1400);
+      });
+    }
 
     // small boot message
     setTimeout(()=>{ metaEl.textContent='System active.'; metaEl.classList.add('show'); setTimeout(()=>metaEl.classList.remove('show'),1600); }, 900);
