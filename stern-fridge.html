@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Stern Fridge</title>
+  <style>
+    :root{
+      --bg:#f5f7f9;
+      --fridge:#eef6fb;
+      --glass:#dfeff8;
+      --accent:#8fbce6;
+      --muted:#8a97a6;
+      --shadow:rgba(17,40,60,0.12);
+      --glow:rgba(120,175,230,0.18);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#1b2530;background:linear-gradient(180deg,var(--bg),#eef5fb 60%);-webkit-font-smoothing:antialiased}
+    .app{min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px}
+    h1{margin:0 0 14px;font-weight:700;color:#0f222f;letter-spacing:0.4px}
+    .frame{display:flex;gap:28px;align-items:flex-start;width:100%;max-width:1000px}
+
+    /* Fridge */
+    .fridge{background:linear-gradient(180deg,var(--fridge),#f8fdff);width:560px;border-radius:12px;padding:18px;box-shadow:0 8px 18px var(--shadow);position:relative;overflow:hidden;border:1px solid rgba(16,36,56,0.06)}
+    .fridge::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at top center,var(--glow),transparent 30%);opacity:0.95;mix-blend-mode:screen;animation:glow 3s ease-in-out infinite}
+    @keyframes glow{0%{opacity:.8}50%{opacity:1}100%{opacity:.85}}
+    .interior{padding:12px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.4),rgba(245,250,255,0.6));min-height:420px;display:flex;flex-direction:column;gap:10px}
+    .shelf{height:110px;border-radius:8px;background:linear-gradient(180deg,rgba(255,255,255,0.5),rgba(245,250,255,0.4));display:flex;align-items:center;padding:12px;gap:12px;border:1px solid rgba(10,20,30,0.03)}
+    .shelf.top{height:86px}
+
+    /* Items */
+    .item{min-width:86px;min-height:64px;background:linear-gradient(180deg,#fff,#f6fbff);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;color:#0d2330;box-shadow:0 6px 12px rgba(16,36,56,0.06);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,outline-color .12s;position:relative}
+    .item:hover{transform:translateY(-6px) scale(1.03)}
+    .item .emoji{font-size:22px;margin-bottom:6px}
+    .item .label{font-size:13px;color:var(--muted)}
+    .item.selected{outline:3px solid rgba(143,188,230,0.28);box-shadow:0 10px 28px rgba(20,70,120,0.12);transform:translateY(-8px) scale(1.04)}
+
+    /* Response panel */
+    .panel{flex:1;display:flex;flex-direction:column;gap:12px}
+    .response{background:#fff;border-radius:10px;padding:16px;box-shadow:0 6px 16px rgba(12,28,40,0.06);min-height:120px;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease}
+    .response.visible{opacity:1;transform:translateY(0)}
+    .observation{font-weight:600;color:#0c2430;margin-bottom:6px}
+    .prediction{color:var(--muted);font-size:14px}
+
+    /* Behavior log */
+    .log{background:linear-gradient(180deg,#f7fbff,#ffffff);padding:12px;border-radius:10px;border:1px solid rgba(10,20,30,0.03);min-width:220px}
+    .log h3{margin:0 0 8px;font-size:14px;color:#0e2a39}
+    .counts{display:flex;flex-direction:column;gap:6px}
+    .count{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+
+    /* Cursor */
+    #cursor{position:fixed;top:0;left:0;width:36px;height:36px;border-radius:50%;pointer-events:none;background:linear-gradient(180deg,#cfe9ff,#9fcdf5);box-shadow:0 6px 18px rgba(70,140,210,0.18);transform:translate(-50%,-50%);mix-blend-mode:screen;z-index:9999;transition:width .12s ease,height .12s ease,background .12s ease}
+
+    /* Responsive */
+    @media (max-width:880px){.frame{flex-direction:column;align-items:center}.fridge{width:92%}.log{width:92%}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>The Stern Fridge</h1>
+    <div class="frame">
+      <div class="fridge" role="application" aria-label="Stern Fridge interior">
+        <div class="interior">
+          <div class="shelf top" id="shelf1">
+            <div class="item" data-id="coke" tabindex="0"><div class="emoji">🥤</div><div class="label">Coke</div></div>
+            <div class="item" data-id="icecream" tabindex="0"><div class="emoji">🍨</div><div class="label">Ice Cream</div></div>
+            <div class="item" data-id="spinach" tabindex="0"><div class="emoji">🥬</div><div class="label">Spinach</div></div>
+          </div>
+          <div class="shelf" id="shelf2">
+            <div class="item" data-id="leftovers" tabindex="0"><div class="emoji">🍱</div><div class="label">Leftovers</div></div>
+            <div class="item" data-id="chocolate" tabindex="0"><div class="emoji">🍫</div><div class="label">Chocolate</div></div>
+            <div class="item" data-id="yogurt" tabindex="0"><div class="emoji">🥣</div><div class="label">Yogurt</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="response" id="response">
+          <div class="observation" id="obs">Click an item to have the fridge judge you.</div>
+          <div class="prediction" id="pred">The Stern Fridge keeps its records.</div>
+        </div>
+
+        <div class="log">
+          <h3>Behavior Log</h3>
+          <div class="counts" id="counts">
+            <div class="count"><span>Coke</span><span id="coke-count">0</span></div>
+            <div class="count"><span>Ice Cream</span><span id="icecream-count">0</span></div>
+            <div class="count"><span>Spinach</span><span id="spinach-count">0</span></div>
+            <div class="count"><span>Leftovers</span><span id="leftovers-count">0</span></div>
+            <div class="count"><span>Chocolate</span><span id="chocolate-count">0</span></div>
+            <div class="count"><span>Yogurt</span><span id="yogurt-count">0</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="cursor" aria-hidden="true"></div>
+
+  <script>
+    (function(){
+      const itemsEl = Array.from(document.querySelectorAll('.item'));
+      const response = document.getElementById('response');
+      const obs = document.getElementById('obs');
+      const pred = document.getElementById('pred');
+      const counts = {coke:0,icecream:0,spinach:0,leftovers:0,chocolate:0,yogurt:0};
+
+      const observations = {
+        coke:["Third Coke today.","A familiar red can. Again?","Carbonation over compassion."],
+        icecream:["The ice cream is disappearing faster this week.","Cold choices, warmer regrets.","You come for the cold comfort."] ,
+        spinach:["A noble but lonely leaf.","Green intentions, questionable follow-through.","You keep a small, quiet virtue here."] ,
+        leftovers:["Leftovers whisper stories of yesterday.","A tupperware time capsule—mysterious.","This will haunt the midnight hours."] ,
+        chocolate:["You seem to prefer sugar over everything else.","Dark, milk, and denial.","Small squares of emotional negotiation."] ,
+        yogurt:["Yogurt: a tidy compromise.","Cultured, like your better habits.","Probiotic optimism observed."]
+      };
+
+      const predictions = {
+        coke:["Soon another will join the count.","You will reach for it again tonight.","The can knows your patterns."],
+        icecream:["It will vanish before dinner.","A spoon will betray you.","Cold hands, rapid spooning."] ,
+        spinach:["Left uneaten, it will wilt into silence.","One day it will be a salad triumph.","It may be blended into secrecy."] ,
+        leftovers:["Beware the microwave's indifference.","A second life in the fridge, or compost.","Nostalgia will prompt another reheating."] ,
+        chocolate:["It will be rationalized as 'for sharing'.", "A single square will become three.","Sweetness will win again."] ,
+        yogurt:["You will forget it behind a mason jar.","It will survive the week—just barely.","It will be eaten with a developmental sigh."]
+      };
+
+      function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+
+      function updateCountsUI(){
+        Object.keys(counts).forEach(k=>{
+          const el = document.getElementById(k+"-count"); if(el) el.textContent = counts[k];
+        });
+      }
+
+      function clearSelected(){itemsEl.forEach(i=>i.classList.remove('selected'))}
+
+      function handleSelect(el){
+        const id = el.dataset.id;
+        if(!id) return;
+        clearSelected();
+        el.classList.add('selected');
+        counts[id] = (counts[id]||0)+1;
+        updateCountsUI();
+
+        const o = pick(observations[id]);
+        const p = pick(predictions[id]);
+
+        obs.textContent = o;
+        pred.textContent = p;
+        response.classList.add('visible');
+        // subtle reset for animation
+        response.style.opacity = 0; setTimeout(()=>response.style.opacity=1,20);
+      }
+
+      itemsEl.forEach(el=>{
+        el.addEventListener('click',()=>handleSelect(el));
+        el.addEventListener('keydown',(e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); handleSelect(el);} });
+      });
+
+      // Custom circular cursor
+      const cursor = document.getElementById('cursor');
+      let mouseX = 0, mouseY = 0, curX = 0, curY = 0;
+      window.addEventListener('mousemove',e=>{mouseX = e.clientX; mouseY = e.clientY; cursor.style.display = 'block';});
+      window.addEventListener('touchstart',()=>{cursor.style.display='none'});
+
+      function raf(){curX += (mouseX - curX) * 0.18; curY += (mouseY - curY) * 0.18; cursor.style.transform = `translate(${curX}px,${curY}px) translate(-50%,-50%)`; requestAnimationFrame(raf)}
+      requestAnimationFrame(raf);
+
+      // small interaction: shrink cursor on hover of items and expand on click
+      itemsEl.forEach(i=>{
+        i.addEventListener('mouseenter',()=>{cursor.style.width='46px';cursor.style.height='46px';cursor.style.background='linear-gradient(180deg,#dff2ff,#a7d6ff)'});
+        i.addEventListener('mouseleave',()=>{cursor.style.width='36px';cursor.style.height='36px';cursor.style.background='linear-gradient(180deg,#cfe9ff,#9fcdf5)'});
+        i.addEventListener('mousedown',()=>{cursor.style.width='26px';cursor.style.height='26px';setTimeout(()=>{cursor.style.width='36px';cursor.style.height='36px'},160)});
+      });
+
+      // initial UI
+      updateCountsUI();
+    })();
+  </script>
+</body>
+</html>
