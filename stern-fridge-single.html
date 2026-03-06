@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Stern Fridge — Single File</title>
+  <style>
+    :root{
+      --bg:#000;
+      --fridge:#071018;
+      --light:#e9f6ff;
+      --muted:#9aa7b2;
+      --accent:#8fd3ff;
+      --shelf-glow: rgba(143,211,255,0.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:var(--bg);color:var(--light);cursor:none;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+      display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 20px;
+    }
+
+    header{text-align:center}
+    header h1{margin:6px 0 2px;font-weight:600}
+    header p{margin:0;color:var(--muted);max-width:760px}
+
+    .stage{display:flex;gap:28px;align-items:flex-start;justify-content:center;width:100%;max-width:1100px}
+
+    /* Fridge */
+    .fridge-wrap{width:680px;max-width:92%}
+    .fridge{position:relative;height:460px;background:linear-gradient(180deg,var(--fridge),#0a1216);border-radius:12px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,0.7), inset 0 -70px 120px rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.03);overflow:hidden}
+
+    .shelf-row{position:relative;width:100%;height:120px;margin-bottom:6px;display:flex;align-items:center;gap:20px;padding:0 12px}
+    .shelf-bar{position:absolute;left:12px;right:12px;height:6px;border-radius:6px;top:calc(100% - 10px);background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);box-shadow:0 6px 18px rgba(0,0,0,0.6) inset}
+    .shelf-light{position:absolute;left:12px;right:12px;height:100%;top:0;pointer-events:none;mix-blend-mode:screen;opacity:0;transition:opacity .28s ease}
+    .shelf-row.glow .shelf-light{opacity:1;background:linear-gradient(90deg,transparent 10%, rgba(143,211,255,0.06) 50%, transparent 90%)}
+
+    .items{display:flex;gap:18px;width:100%;justify-content:space-around;z-index:2}
+    .item{min-width:120px;padding:14px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:linear-gradient(180deg,#ffffff04,#ffffff02);color:var(--light);font-size:15px;text-align:center;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;transform-origin:center;position:relative}
+    .item:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 18px 36px rgba(0,0,0,0.65),0 0 20px rgba(143,211,255,0.04)}
+    .item:active{transform:translateY(-4px) scale(0.995)}
+    .item.surface{transform:translateY(-14px) scale(1.06);box-shadow:0 30px 60px rgba(0,0,0,0.75),0 0 36px rgba(143,211,255,0.12)}
+
+    /* subtle visual differentiation for items */
+    .item[data-item="Spinach"]{background:linear-gradient(180deg,#0b3b24,#123a2b);color:#cfeed8}
+    .item[data-item="Ice Cream"]{background:linear-gradient(180deg,#fff9f2,#fff7ee);color:#2b2b2b}
+    .item[data-item="Coke"]{background:linear-gradient(180deg,#2b2b2b,#1a1a1a);color:#fff}
+    .item[data-item="Chocolate"]{background:linear-gradient(180deg,#3b2b23,#2a1b15);color:#ffdcb8}
+    .item[data-item="Yogurt"]{background:linear-gradient(180deg,#f7fbff,#eaf6ff);color:#122433}
+    .item[data-item="Leftovers"]{background:linear-gradient(180deg,#3a3a2f,#2d2d22);color:#fff9dc}
+
+    /* Response panel */
+    .response{margin-top:14px;padding:14px 16px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:8px;height:74px;display:flex;flex-direction:column;justify-content:center;gap:6px}
+    .resp{opacity:0;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease;color:var(--light)}
+    .resp.show{opacity:1;transform:translateY(0)}
+    .resp.pred{color:var(--accent);font-weight:600}
+
+    /* Log */
+    .log{width:240px;color:var(--muted);max-width:28%}
+    .log h2{margin:0 0 8px 0;font-size:18px;color:var(--light)}
+    .log ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+    .log li{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:8px}
+    .count{background:#ffffff06;padding:6px 10px;border-radius:999px;font-weight:700;color:var(--light)}
+
+    /* custom cursor */
+    .cursor{position:fixed;pointer-events:none;z-index:9999;width:22px;height:22px;border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:screen;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,0.95),rgba(143,211,255,0.18) 40%,transparent 55%);box-shadow:0 0 12px rgba(143,211,255,0.12);border:1px solid rgba(255,255,255,0.06);transition:transform .12s ease, width .12s ease, height .12s ease}
+    .cursor.scan::after{content:"";position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 2px rgba(143,211,255,0.08) inset;animation:scan 2.8s linear infinite}
+    .cursor.big{transform:translate(-50%,-50%) scale(1.6)}
+    @keyframes scan{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+    @media(max-width:980px){.stage{flex-direction:column}.log{width:92%}}
+  </style>
+</head>
+<body>
+  <div class="cursor scan" id="cursor"></div>
+  <header>
+    <h1>The Stern Fridge</h1>
+    <p>A refrigerator that observes your food habits and becomes increasingly critical as patterns repeat.</p>
+  </header>
+
+  <div class="stage">
+    <div class="fridge-wrap">
+      <div class="fridge" role="application" aria-label="Stern Fridge">
+
+        <div class="shelf-row" data-shelf="top">
+          <div class="shelf-light" aria-hidden="true"></div>
+          <div class="items">
+            <button class="item" data-item="Coke">Coke</button>
+            <button class="item" data-item="Ice Cream">Ice Cream</button>
+            <button class="item" data-item="Chocolate">Chocolate</button>
+          </div>
+          <div class="shelf-bar" aria-hidden="true"></div>
+        </div>
+
+        <div class="shelf-row" data-shelf="mid">
+          <div class="shelf-light" aria-hidden="true"></div>
+          <div class="items">
+            <button class="item" data-item="Spinach">Spinach</button>
+            <button class="item" data-item="Yogurt">Yogurt</button>
+            <button class="item" data-item="Leftovers">Leftovers</button>
+          </div>
+          <div class="shelf-bar" aria-hidden="true"></div>
+        </div>
+
+        <div class="response" id="response" aria-live="polite">
+          <div class="resp" id="obs"></div>
+          <div class="resp pred" id="pred"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <aside class="log" aria-label="Behavior Log">
+      <h2>Behavior Log</h2>
+      <ul id="log"></ul>
+    </aside>
+  </div>
+
+  <script>
+    (function(){
+      const ITEMS = ['Coke','Ice Cream','Chocolate','Spinach','Yogurt','Leftovers'];
+      const items = Array.from(document.querySelectorAll('.item'));
+      const obsEl = document.getElementById('obs');
+      const predEl = document.getElementById('pred');
+      const logEl = document.getElementById('log');
+      const cursor = document.getElementById('cursor');
+
+      // progressive comments per item based on count
+      const tone = {
+        'Coke': [
+          'Another soda.',
+          'Second Coke today.',
+          'Third Coke today. This is becoming a pattern.',
+          'You keep returning to sugar even when you know what follows.'
+        ],
+        'Ice Cream': [
+          'A scoop for later.',
+          'Second time with ice cream this week.',
+          'The ice cream is disappearing faster this week.',
+          'You seem to use cold sweetness as refuge — again.'
+        ],
+        'Chocolate': [
+          'Chocolate noted.',
+          'Another round of chocolate.',
+          'You seem to prefer sugar over everything else.',
+          'This habit of reaching for sweets keeps repeating.'
+        ],
+        'Spinach': [
+          'Spinach — sensible.',
+          'A second leafy choice.',
+          'You choose greens intermittently.',
+          'Occasional virtue does not define a pattern yet.'
+        ],
+        'Yogurt': [
+          'Yogurt, practical.',
+          'Another yogurt — predictable.',
+          'Practical choices stacking up.',
+          'Routine consumption observed; predictability rising.'
+        ],
+        'Leftovers': [
+          'Leftovers saved.',
+          'Again with leftovers.',
+          'Rescued dinner becomes a frequent fallback.',
+          'This repeated reliance on leftovers looks like avoidance.'
+        ]
+      };
+
+      const predictions = [
+        'You may return for another snack later tonight.',
+        'A similar choice is likely within the next few hours.',
+        'This behavior tends to repeat.'
+      ];
+
+      // persistence
+      const KEY = 'sternFridge_single_counts_v1';
+      let counts = JSON.parse(localStorage.getItem(KEY) || '{}');
+      ITEMS.forEach(k=>counts[k]=counts[k]||0);
+
+      function renderLog(){
+        logEl.innerHTML='';
+        ITEMS.forEach(name=>{
+          const li=document.createElement('li');
+          li.innerHTML = `<span>${name}</span><span class="count">${counts[name]}</span>`;
+          logEl.appendChild(li);
+        });
+      }
+
+      function randomPred(){ return predictions[Math.floor(Math.random()*predictions.length)]; }
+
+      function showResponse(name){
+        const c = counts[name];
+        const idx = Math.min(c-1, tone[name].length-1);
+        obsEl.textContent = tone[name][idx];
+        predEl.textContent = randomPred();
+
+        // animate
+        obsEl.classList.remove('show'); predEl.classList.remove('show');
+        void obsEl.offsetWidth; // reflow
+        obsEl.classList.add('show'); predEl.classList.add('show');
+      }
+
+      function clearActive(){
+        document.querySelectorAll('.item.surface').forEach(n=>n.classList.remove('surface'));
+        document.querySelectorAll('.shelf-row.glow').forEach(s=>s.classList.remove('glow'));
+      }
+
+      items.forEach(btn=>{
+        // allow keyboard focus
+        btn.tabIndex = 0;
+
+        btn.addEventListener('click', ()=>{
+          const name = btn.dataset.item;
+          counts[name] = (counts[name]||0) + 1;
+          localStorage.setItem(KEY, JSON.stringify(counts));
+          renderLog();
+
+          clearActive();
+          // surface item and glow its shelf
+          btn.classList.add('surface');
+          const shelf = btn.closest('.shelf-row');
+          if(shelf) shelf.classList.add('glow');
+
+          showResponse(name);
+        });
+
+        btn.addEventListener('mouseenter', ()=> cursor.classList.add('big'));
+        btn.addEventListener('mouseleave', ()=> cursor.classList.remove('big'));
+      });
+
+      // cursor follow
+      document.addEventListener('mousemove', e=>{
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+
+      // keyboard access: Enter/Space
+      document.addEventListener('keydown', e=>{
+        const active = document.activeElement;
+        if((e.key === 'Enter' || e.key === ' ') && active && active.classList.contains('item')){
+          e.preventDefault(); active.click();
+        }
+      });
+
+      // initial render
+      renderLog();
+
+    })();
+  </script>
+</body>
+</html>
