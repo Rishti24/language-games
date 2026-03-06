@@ -28,14 +28,13 @@
     header p{margin:6px 0 0;color:var(--muted);font-size:13px}
     header .hint{margin-top:8px;color:rgba(102,201,255,0.18);font-size:12px}
 
-    /* Stage */
-    .stage{position:relative;display:flex;gap:28px;align-items:flex-start;justify-content:center;z-index:2}
+    /* Stage layout: strict fixed grid
+       Columns: left spacer | fridge (approx 60vw) | log (approx 20vw) | right spacer
+    */
+    .stage{position:relative;display:grid;grid-template-columns:1fr 60vw 20vw 1fr;grid-template-rows:1fr auto;gap:36px;align-items:center;justify-items:center;z-index:2;width:100%;height:calc(100vh - 120px);}
 
-    /* Fridge as central illuminated object */
-    .fridge-wrap{width:820px;max-width:94%;display:flex;justify-content:center}
     .fridge{
-      position:relative;width:720px;height:520px;border-radius:14px;padding:28px;background:linear-gradient(180deg,#061219 0%, #07131a 48%, #031016 100%);box-shadow:0 40px 120px rgba(0,0,0,0.8), 0 8px 48px rgba(12,22,28,0.6) inset;border:1px solid var(--glass);overflow:hidden
-    }
+      position:relative;width:60vw;max-width:920px;height:56vh;min-height:420px;border-radius:14px;padding:28px;background:linear-gradient(180deg,#061219 0%, #07131a 48%, #031016 100%);box-shadow:0 40px 120px rgba(0,0,0,0.8), 0 8px 48px rgba(12,22,28,0.6) inset;border:1px solid var(--glass);overflow:hidden;grid-column:2 / 3;grid-row:1 / 2;}
 
     /* hum / living lighting */
     .fridge::before{content:'';position:absolute;inset:0;background:radial-gradient(300px 120px at 50% 24%, rgba(102,201,255,0.035), transparent 25%);pointer-events:none;mix-blend-mode:screen;animation:fridge-breathe 6s ease-in-out infinite}
@@ -63,8 +62,10 @@
     .item[data-item="Leftovers"]{background:linear-gradient(180deg,#2e2d28,#1f1f19);color:#fff9e0}
 
     /* projection / emergent response */
-    .projection{position:absolute;left:50%;transform:translateX(-50%);bottom:20px;width:68%;pointer-events:none;z-index:4;display:flex;flex-direction:column;align-items:center;gap:10px}
-    .crit{background:linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.15));padding:12px 18px;border-radius:10px;color:var(--cold);font-weight:600;letter-spacing:0.2px;max-width:100%;text-align:center;opacity:0;transform:translateY(8px);transition:opacity .36s ease,transform .36s ease}
+
+    /* Response panel lives below fridge (outside the fridge area) */
+    .response-area{grid-column:2 / 3;grid-row:2 / 3;display:flex;flex-direction:column;align-items:center;gap:10px}
+    .crit{background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.18));padding:12px 18px;border-radius:10px;color:var(--cold);font-weight:600;letter-spacing:0.2px;max-width:64vw;text-align:center;opacity:0;transform:translateY(8px);transition:opacity .36s ease,transform .36s ease}
     .crit.show{opacity:1;transform:translateY(0);filter:drop-shadow(0 14px 40px rgba(0,0,0,0.6))}
     .crit.sharp{color:var(--danger);font-weight:700}
 
@@ -78,10 +79,11 @@
     .meta{position:absolute;top:18px;left:28px;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);font-size:12px;opacity:0;transition:opacity .4s ease}
     .meta.show{opacity:1}
 
-    /* log subtle */
-    .log{position:absolute;right:28px;top:28px;color:var(--muted);font-size:13px}
-    .log ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
-    .log li{display:flex;gap:12px;align-items:center}
+    /* log panel sits in grid column 3 and must not overlap fridge */
+    .log{grid-column:3 / 4;grid-row:1 / 2;align-self:start;color:var(--muted);font-size:13px;position:relative;z-index:3;padding-left:8px}
+    .log .title{font-weight:700;color:var(--cold);margin-bottom:8px}
+    .log ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+    .log li{display:flex;justify-content:space-between;gap:12px;padding:6px 10px;background:rgba(255,255,255,0.02);border-radius:8px}
     .log .count{background:rgba(255,255,255,0.03);padding:4px 8px;border-radius:999px;font-weight:700;color:var(--cold)}
 
     /* cursor */
@@ -113,11 +115,6 @@
 
         <div class="meta" id="meta"></div>
 
-        <div class="log" aria-hidden="false">
-          <div style="font-weight:700;color:var(--cold)">Behavior</div>
-          <ul id="log"></ul>
-        </div>
-
         <div class="shelf top" data-shelf="top">
           <div class="glow"></div>
           <div class="bar"></div>
@@ -134,11 +131,26 @@
           <div class="item" data-item="Leftovers" tabindex="0">Leftovers</div>
         </div>
 
-        <div class="projection" aria-hidden="true">
-          <div class="crit" id="crit"></div>
-          <div class="proc" id="proc">processing<span id="proc-dots">.</span></div>
-          <div class="pred" id="pred"></div>
+        <div class="shelf bot" data-shelf="bot">
+          <div class="glow"></div>
+          <div class="bar"></div>
+          <!-- third shelf intentionally left empty for balance (no text allowed inside shelves) -->
         </div>
+
+      </div>
+
+      <!-- response area BELOW the fridge, centered, outside the fridge element -->
+      <div class="response-area">
+        <div class="crit" id="crit"></div>
+        <div class="proc" id="proc">processing<span id="proc-dots">.</span></div>
+        <div class="pred" id="pred"></div>
+      </div>
+
+      <!-- behavior log panel (outside and to the right) -->
+      <div class="log" aria-label="Behavior Log">
+        <div class="title">Behavior</div>
+        <ul id="log"></ul>
+      </div>
 
       </div>
     </div>
@@ -259,7 +271,7 @@
       logEl.innerHTML='';
       ITEMS.forEach(name=>{
         const li = document.createElement('li');
-        li.innerHTML = `<span style="min-width:88px">${name}</span><span class="count">${counts[name]}</span>`;
+        li.innerHTML = `<span>${name}</span><span class="count">${counts[name]}</span>`;
         logEl.appendChild(li);
       });
     }
