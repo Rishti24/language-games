@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Looping — Manifesto</title>
+  <style>
+    :root{--bg1:#ff9a9e;--bg2:#fad0c4;--bg3:#a18cd1;--bg4:#fbc2eb;--accent:#0f172a;--mx:0;--my:0}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial; color:var(--accent)}
+    /* colorful looping animated background */
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(120deg,var(--bg1),var(--bg2),var(--bg3));background-size:400% 400%;animation:shift 14s ease-in-out infinite;}
+    @keyframes shift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    .wrap{width:min(980px,94vw);padding:4rem 2rem;display:flex;flex-direction:column;gap:2.5rem;border-radius:16px;background:rgba(255,255,255,0.995);z-index:1200}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,1),rgba(255,255,255,0.998));padding:2.2rem;border-radius:12px;box-shadow:0 22px 72px rgba(16,24,40,0.18);border:1px solid rgba(8,16,36,0.12)}
+
+    .hero{display:flex;flex-direction:column;gap:.6rem}
+    .title{font-size:clamp(28px,6vw,48px);line-height:1.02;font-weight:800;margin:0;color:#031026;text-shadow:0 6px 22px rgba(8,16,32,0.06)}
+
+    .sub{font-size:clamp(12px,2.2vw,16px);opacity:.78;margin:0}
+    .sub .ellipsis{display:inline-block;min-width:5ch;opacity:.9}
+
+    .gallery{display:flex;gap:14px;align-items:center}
+    .tile{flex:1;min-height:96px;border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(255,255,255,0.86),rgba(255,255,255,0.72));position:relative;border:1px solid rgba(8,20,40,0.06)}
+    .tile svg{width:100%;height:100%;display:block}
+    .tile .label{position:absolute;left:10px;bottom:8px;font-size:11px;background:rgba(255,255,255,0.98);padding:4px 8px;color:#041226;border-radius:6px}
+    .tile .badge{position:absolute;right:8px;top:8px;font-size:11px;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#fff7ed,#fff1f2);color:#111827;border:1px solid rgba(8,16,36,0.04);font-weight:700;box-shadow:0 6px 18px rgba(16,24,40,0.08)}
+    .tile:hover{transform:translateY(-8px) scale(1.03);transition:transform .28s cubic-bezier(.2,.9,.2,1);box-shadow:0 22px 46px rgba(16,24,40,0.14)}
+    .tile{transition:transform .28s ease,box-shadow .28s ease}
+
+    /* hide the default cursor and render a soft fluid custom pointer */
+    body{cursor:none}
+    .pointer{position:fixed;left:0;top:0;z-index:2200;pointer-events:none;width:36px;height:36px;border-radius:50%;transform:translate(-50%,-50%) scale(1);will-change:transform,opacity;transition:opacity .18s ease,transform .18s cubic-bezier(.2,.9,.3,1)}
+    .pointer .core{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,0.98),rgba(255,255,255,0.7));box-shadow:0 6px 22px rgba(8,16,36,0.12);border:1px solid rgba(8,16,36,0.04)}
+    .pointer .halo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,rgba(161,140,209,0.08),rgba(255,211,165,0.03));filter:blur(2px);opacity:0.55}
+    .pointer--press{transform:translate(-50%,-50%) scale(0.86)}
+    @keyframes spin {to{transform:rotate(360deg)}}
+    /* loading state */
+    .pointer.pointer--loading .halo{animation:spin 900ms linear infinite;filter:blur(6px);opacity:1}
+    .pointer.pointer--loading .core{transform:scale(0.92);box-shadow:0 14px 36px rgba(8,16,36,0.16);background:radial-gradient(circle at 30% 30%,#fff,#f3f4f6)}
+
+    /* remove decorative blobs entirely to eliminate background blur */
+    .blobs{display:none!important}
+    .blob.b1{width:420px;height:420px;left:-8%;top:8%;background:radial-gradient(circle at 30% 30%,#ff9a9e,#fbc2eb);animation:blobmove 18s ease-in-out infinite;transform:translate(calc(var(--mx) * 0.12px), calc(var(--my) * 0.12px))}
+    .blob.b2{width:520px;height:520px;right:-12%;top:18%;background:radial-gradient(circle at 30% 30%,#a18cd1,#fad0c4);animation:blobmove 22s ease-in-out infinite;animation-delay:2s;transform:translate(calc(var(--mx) * -0.14px), calc(var(--my) * 0.1px))}
+    .blob.b3{width:360px;height:360px;left:18%;bottom:-6%;background:radial-gradient(circle at 60% 40%,#ffd3a5,#fd6585);animation:blobmove 20s ease-in-out infinite;animation-delay:4s;transform:translate(calc(var(--mx) * 0.08px), calc(var(--my) * -0.16px))}
+    @keyframes blobmove{0%{transform:translateY(0) rotate(0)}50%{transform:translateY(-30px) rotate(6deg)}100%{transform:translateY(0) rotate(0)}}
+
+    footer{font-size:12px;opacity:.72;text-align:center}
+
+    /* keep micro-motion but very subtle for a flat aesthetic */
+    .osc{animation:float linear infinite}
+    .tile:nth-child(1) .osc{animation-duration:9.9s}
+    .tile:nth-child(2) .osc{animation-duration:11.3s;animation-delay:0.4s}
+    .tile:nth-child(3) .osc{animation-duration:10.7s;animation-delay:1.1s}
+    @keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-3px)}100%{transform:translateY(0)}}
+
+    /* flat tile outline */
+    .tile::before{content:"";position:absolute;inset:0;border-radius:8px;border:1px solid rgba(12,24,40,0.02);pointer-events:none}
+
+    /* give a restless, never-resolving underline */
+    .title .trail{display:inline-block;margin-left:.4ch;color:rgba(8,16,41,0.6)}
+
+    /* accessibility: respect user motion */
+    @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+  </style>
+</head>
+<body>
+  <div class="blobs" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+  <main class="wrap panel" role="main">
+    <section class="hero">
+      <div style="display:flex;gap:12px;align-items:center">
+        <span style="width:44px;height:6px;border-radius:6px;background:linear-gradient(90deg,#ffd3a5,#a18cd1);display:inline-block"></span>
+        <h1 class="title">It continues, slightly unfinished.</h1>
+        <button class="read-title" aria-label="Read title" title="Read title" style="margin-left:10px;padding:6px 8px;border-radius:8px;border:1px solid rgba(8,16,36,0.06);background:transparent;cursor:pointer">🔊</button>
+      </div>
+      <p class="sub">A simple, looping interface — a space that keeps a small gap open.</p>
+      <p style="margin:.6rem 0 0 0;color:#6b7280;font-size:13px;opacity:.95">An experimental palette, intentionally incomplete — click any frame to explore an in-progress thought.</p>
+      <div style="margin-top:12px">
+        <button class="cta">Explore a loop</button>
+      </div>
+    </section>
+
+    <section class="gallery">
+      <a class="tile" data-id="1" data-side="true" href="#/wip/1" aria-label="Open work in progress image 1">
+        <svg id="svg1" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff9a9e"/><stop offset="1" stop-color="#fbc2eb"/></linearGradient>
+          </defs>
+          <rect width="300" height="160" fill="url(#g1)"/>
+          <g fill="#fff" fill-opacity="0.14">
+            <circle cx="60" cy="100" r="50" />
+            <circle cx="220" cy="50" r="30" />
+          </g>
+          <g fill="none" stroke="#081029" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.06">
+            <path d="M10 20 C 60 10, 120 40, 170 30 S 270 40, 290 20" />
+            <path d="M10 140 C 80 120, 150 140, 290 110" />
+          </g>
+        </svg>
+        <div class="label">WIP — Loop Study</div>
+        <div class="badge">in-progress</div>
+      </a>
+
+      <a class="tile" data-id="2" data-side="true" href="#/wip/2" aria-label="Open work in progress image 2">
+        <svg id="svg2" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:0.4s">
+          <defs>
+            <linearGradient id="g2" x1="0" x2="1"><stop offset="0" stop-color="#a18cd1"/><stop offset="1" stop-color="#fad0c4"/></linearGradient>
+            <filter id="grain"><feTurbulence baseFrequency="0.9" numOctaves="1" result="t"/><feColorMatrix type="saturate" values="0"/></filter>
+          </defs>
+          <rect width="300" height="160" fill="url(#g2)"/>
+          <g transform="translate(0,12)" opacity="0.12">
+            <rect x="36" y="12" width="228" height="120" rx="18" fill="#fff" />
+          </g>
+          <g fill="#081029" fill-opacity="0.06">
+            <circle cx="75" cy="48" r="22" />
+            <rect x="180" y="78" width="76" height="28" rx="6" />
+          </g>
+        </svg>
+        <div class="label">WIP — Interface Sketch</div>
+        <div class="badge">draft</div>
+      </a>
+
+      <a class="tile" data-id="3" data-side="true" href="#/wip/3" aria-label="Open work in progress image 3">
+        <svg id="svg3" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" class="osc" style="animation-delay:1.1s">
+          <defs>
+            <linearGradient id="g3" x1="0" x2="1"><stop offset="0" stop-color="#ffd3a5"/><stop offset="1" stop-color="#fd6585"/></linearGradient>
+          </defs>
+          <rect width="300" height="160" fill="url(#g3)"/>
+          <g fill="#fff" fill-opacity="0.1">
+            <path d="M30 110c30-60 120-60 200-6"/>
+            <circle cx="40" cy="40" r="18"/>
+          </g>
+          <g fill-opacity="0.07" fill="#081029">
+            <rect x="110" y="28" width="78" height="18" rx="6"/>
+            <rect x="40" y="118" width="220" height="6" rx="3"/>
+          </g>
+        </svg>
+        <div class="label">WIP — Glitch Frame</div>
+        <div class="badge">experimental</div>
+      </a>
+    </section>
+
+    <!-- in-site page viewer (single-file route via hash) -->
+    <div id="page" class="page" hidden aria-hidden="true">
+      <div class="page-backdrop" data-close></div>
+      <div class="page-frame" role="document">
+        <a class="page-back" href="#" aria-label="Back">← back</a>
+        <div id="page-content" class="page-content" tabindex="0"></div>
+        <div class="page-caption" id="page-caption"></div>
+      </div>
+    </div>
+
+    <footer>
+      <small>Manifesto-inspired interface — intentionally leaving space.</small>
+    </footer>
+  </main>
+
+  <style>
+    /* overlay styles (in-page popups) */
+    .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1400}
+    .overlay-backdrop{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,24,0.72),rgba(8,16,36,0.88));backdrop-filter:none}
+    .overlay-card{position:relative;max-width:780px;width:min(94vw,780px);background:linear-gradient(180deg,rgba(255,255,255,0.96),rgba(255,255,255,0.9));border-radius:12px;padding:18px;border:1px solid rgba(8,16,36,0.06);box-shadow:0 30px 80px rgba(8,16,36,0.14);transform:translateY(10px);opacity:0;transition:opacity .26s ease,transform .26s ease}
+    .overlay.open .overlay-card{opacity:1;transform:translateY(0)}
+    .overlay-inner{display:flex;gap:18px;align-items:flex-start}
+    .overlay-left{flex:0 0 44%;min-width:240px}
+    .overlay-right{flex:1}
+    .overlay-close{position:absolute;right:12px;top:12px;background:transparent;border:0;font-size:16px;color:#374151}
+    .overlay h3{margin:0 0 8px 0;font-size:18px}
+    .overlay p{margin:0 0 8px 0;color:#374151}
+    .reveal{opacity:0;transform:translateY(6px);transition:opacity .34s ease,transform .34s ease}
+    .reveal.show{opacity:1;transform:translateY(0)}
+    .meta{font-size:12px;color:#6b7280;margin-top:8px}
+    .tags{display:flex;gap:8px;margin-top:10px}
+    .tag{font-size:11px;padding:6px 8px;border-radius:999px;background:linear-gradient(90deg,#f3f4f6,#fff);border:1px solid rgba(8,16,36,0.04);color:#374151}
+    .tag.colored{background:linear-gradient(90deg,#ffd3a5,#ff9a9e);color:#1f2937;border:none}
+    .tag.colored:nth-child(2){background:linear-gradient(90deg,#a18cd1,#c7a3e6)}
+    .tag.colored:nth-child(3){background:linear-gradient(90deg,#a7f3d0,#60a5fa)}
+
+    
+  </style>
+  <script>
+    // tiny theme nudge: shift background colors slowly for variety
+    (function(){
+      const body = document.body;
+      let t=0;
+      function tick(){
+        t+=0.0018;
+        const a = Math.sin(t)*0.5+0.5; // 0..1
+        const b = Math.cos(t*0.73)*0.5+0.5;
+        body.style.setProperty('--bg1', `hsl(${200 + a*60} 85% 75%)`);
+        body.style.setProperty('--bg3', `hsl(${260 + b*40} 60% 70%)`);
+        requestAnimationFrame(tick);
+      }
+      if(window.matchMedia('(prefers-reduced-motion: no-preference)').matches){requestAnimationFrame(tick)}
+    })();
+
+    // make the headline feel unfinished: jittering dots and random trailing marks
+    (function(){
+      const title = document.querySelector('.title');
+      if(!title) return;
+      const base = title.textContent.trim().replace(/[.\s…,]+$/,'');
+      title.dataset.base = base;
+
+      function restless(){
+        // create a small, never-stable suffix
+        const r = Math.random();
+        let suffix = '';
+        if(r < 0.35) suffix = Array(1 + Math.floor(Math.random()*6)).fill('.').join('');
+        else if(r < 0.65) suffix = r > 0.5 ? ',' : '…';
+        else suffix = (Math.random()>.5) ? ',…' : '….';
+        title.textContent = base + (Math.random()>0.2 ? suffix : suffix + ' ');
+      }
+
+      // vary interval so it never feels like a fixed loop
+      (function loop(){
+        restless();
+        const next = 380 + Math.floor(Math.random()*900);
+        setTimeout(loop, next);
+      })();
+      // add read-title control behavior (accessible speech)
+      (function(){
+        try{
+          const btn = document.querySelector('.read-title');
+          const title = document.querySelector('.title');
+          if(!btn || !title || !('speechSynthesis' in window)) return;
+          btn.addEventListener('click', ()=>{
+            const text = title.dataset.base || title.textContent || '';
+            if(!text) return;
+            try{ window.speechSynthesis.cancel(); }catch(e){}
+            const u = new SpeechSynthesisUtterance(text.trim());
+            u.rate = 1; u.pitch = 1; u.lang = document.documentElement.lang || 'en-US';
+            window.speechSynthesis.speak(u);
+          });
+        }catch(e){/* ignore */}
+      })();
+    })();
+
+    // CTA pulse
+    (function(){
+      const cta = document.querySelector('.cta');
+      if(!cta) return;
+      cta.style.border = '1px solid rgba(8,16,36,0.06)';
+      cta.style.background = 'linear-gradient(90deg,#fff,#fff0)';
+      cta.style.padding = '8px 12px';
+      cta.style.borderRadius = '10px';
+      cta.style.cursor = 'pointer';
+      cta.style.fontWeight = '600';
+      cta.style.color = '#0f172a';
+      cta.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(1)'}],{duration:2200,iterations:Infinity});
+      cta.addEventListener('click', ()=>{ const first = document.querySelector('.tile'); if(first) first.click(); });
+    })();
+
+    
+
+    // small, continuous micro-movements on svg shapes to feel like they're still forming
+    (function(){
+      const svgs = document.querySelectorAll('.tile svg g');
+      svgs.forEach((g,i)=>{
+        // faster, slightly larger random nudges to create a gentle "shaking/revealing" feel
+        const dur = 900 + i*300 + Math.floor(Math.random()*800);
+        g.style.transition = `transform ${dur}ms cubic-bezier(.22,.9,.36,1)`;
+        (function nudge(){
+          const tx = (Math.random()-0.5)*16; // wider horizontal wobble
+          const ty = (Math.random()-0.5)*10; // subtle vertical jitter
+          const rot = (Math.random()-0.5)*4.2; // small rotation shake
+          g.style.transform = `translate(${tx}px,${ty}px) rotate(${rot}deg)`;
+          setTimeout(nudge, dur + Math.floor(Math.random()*600));
+        })();
+      });
+    })();
+
+    // create a soft, fluid custom pointer that follows the real pointer with smoothing
+    (function(){
+      if(window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return; // skip on touch
+      if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const ptr = document.createElement('div'); ptr.className = 'pointer'; ptr.innerHTML = '<div class="halo"></div><div class="core"></div>';
+      document.body.appendChild(ptr);
+      let tx = window.innerWidth/2, ty = window.innerHeight/2; // target
+      let x = tx, y = ty; // current
+      const ease = 0.18;
+      function raf(){
+        x += (tx - x) * ease; y += (ty - y) * ease;
+        ptr.style.left = x + 'px'; ptr.style.top = y + 'px';
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+      // update target on pointer move
+      window.addEventListener('pointermove', (e)=>{ tx = e.clientX; ty = e.clientY; ptr.style.opacity = 1; });
+      window.addEventListener('pointerdown', ()=> ptr.classList.add('pointer--press'));
+      window.addEventListener('pointerup', ()=> ptr.classList.remove('pointer--press'));
+
+      // subtle interaction cue: when hovering tiles, slightly grow pointer and add glow
+      document.querySelectorAll('.tile').forEach(t => {
+        t.addEventListener('pointerenter', ()=>{ ptr.style.transform = 'translate(-50%,-50%) scale(1.06)'; ptr.style.boxShadow = '0 10px 30px rgba(8,16,36,0.12)'; });
+        t.addEventListener('pointerleave', ()=>{ ptr.style.transform = 'translate(-50%,-50%) scale(1)'; ptr.style.boxShadow = ''; });
+      });
+    })();
+    // overlays: open small in-page popup panels with progressive reveal
+    (function(){
+      // create overlay DOM
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay'; overlay.id = 'overlay'; overlay.hidden = true; overlay.setAttribute('aria-hidden','true');
+      overlay.innerHTML = `
+        <div class="overlay-backdrop" data-close></div>
+        <div class="overlay-card" role="dialog" aria-modal="true">
+          <button class="overlay-close" data-close aria-label="Close">✕</button>
+          <div class="overlay-inner">
+            <div class="overlay-left" id="overlay-left"></div>
+            <div class="overlay-right" id="overlay-right"></div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      const innerLeft = document.getElementById('overlay-left');
+      const innerRight = document.getElementById('overlay-right');
+
+      function openOverlay(id){
+        const tile = document.querySelector(`.tile[data-id="${id}"]`);
+        if(!tile) return;
+        const svg = tile.querySelector('svg');
+        const label = tile.querySelector('.label')?.textContent || '';
+        // clear
+        innerLeft.innerHTML = '';
+        innerRight.innerHTML = '';
+
+        // clone svg for left pane
+        const clone = svg.cloneNode(true);
+        clone.removeAttribute('preserveAspectRatio');
+        clone.setAttribute('preserveAspectRatio','xMidYMid meet');
+        clone.style.width = '100%'; clone.style.height = 'auto';
+        innerLeft.appendChild(clone);
+
+        // progressive content on right
+        const h = document.createElement('h3'); h.textContent = label; h.className = 'reveal'; innerRight.appendChild(h);
+        const p1 = document.createElement('p'); p1.textContent = 'Work in progress — slightly unfinished. Content arrives slowly.'; p1.className = 'reveal'; innerRight.appendChild(p1);
+        // meta + tags
+        const meta = document.createElement('div'); meta.className = 'meta reveal'; meta.textContent = 'Status: in-progress · Author: experimental'; innerRight.appendChild(meta);
+        const tags = document.createElement('div'); tags.className = 'tags reveal'; ['loop','draft','open'].forEach((t,i)=>{ const s = document.createElement('span'); s.className='tag colored'; s.textContent=t; tags.appendChild(s)}); innerRight.appendChild(tags);
+        const dots = document.createElement('div'); dots.className = 'reveal'; innerRight.appendChild(dots);
+        const cont = document.createElement('button'); cont.textContent = 'continue'; cont.className = 'reveal'; cont.style.marginTop = '10px'; cont.style.padding = '8px 10px'; cont.style.border='1px solid rgba(8,16,36,0.06)'; cont.style.background='transparent'; cont.style.borderRadius='8px'; innerRight.appendChild(cont);
+
+        // show overlay
+        overlay.hidden = false; overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+
+        // set hash for shareability (replaceState avoids adding history entry)
+        try{ history.replaceState(null,'', location.pathname + location.search + `#/wip/${id}`); }catch(e){ location.hash = `/wip/${id}` }
+
+        // staged reveal
+        setTimeout(()=> h.classList.add('show'), 120);
+        setTimeout(()=> p1.classList.add('show'), 420);
+        setTimeout(()=> meta.classList.add('show'), 680);
+        setTimeout(()=> tags.classList.add('show'), 920);
+        // progressive dots to feel unfinished
+        let i=0; const dotInt = setInterval(()=>{ dots.textContent = Array((i%5)+1).fill('.').join(''); dots.classList.add('show'); i++; }, 360);
+
+        // progressive continue reveals more content
+        let contStage = 0; const more = ['A sentence left open', 'A fragment that loops', 'Another unfinished thought…'];
+        function revealMore(){
+          if(contStage >= more.length) return;
+          const p = document.createElement('p'); p.textContent = more[contStage]; p.className = 'reveal'; innerRight.appendChild(p);
+          setTimeout(()=> p.classList.add('show'), 80);
+          contStage++;
+        }
+        cont.addEventListener('click', revealMore);
+
+        // store cleanup handle
+        overlay._cleanup = ()=>{ clearInterval(dotInt); cont.removeEventListener('click', revealMore); };
+      }
+
+      function closeOverlay(){
+        overlay.hidden = true; overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true');
+        innerLeft.innerHTML = ''; innerRight.innerHTML = '';
+        document.body.style.overflow = '';
+        if(overlay._cleanup) overlay._cleanup();
+        // clear hash without adding history entry
+        try{ history.replaceState(null,'', location.pathname + location.search + '#'); }catch(e){ location.hash = ''; }
+      }
+
+      // wire tile clicks to open overlay (prevent leaving page) and show pointer loading
+      document.querySelectorAll('.tile').forEach(tile =>{
+        let hoverTimer = null;
+        tile.addEventListener('pointerenter', ()=>{
+          const ptr = document.querySelector('.pointer');
+          hoverTimer = setTimeout(()=>{ if(ptr) ptr.classList.add('pointer--loading'); }, 420);
+        });
+        tile.addEventListener('pointerleave', ()=>{
+          clearTimeout(hoverTimer);
+          const ptr = document.querySelector('.pointer'); if(ptr) ptr.classList.remove('pointer--loading');
+        });
+        tile.addEventListener('click', (ev)=>{
+          ev.preventDefault();
+          const id = tile.dataset.id;
+          const ptr = document.querySelector('.pointer'); if(ptr) ptr.classList.add('pointer--loading');
+          setTimeout(()=>{ openOverlay(id); if(ptr) ptr.classList.remove('pointer--loading'); }, 420);
+        });
+      });
+
+      // also support opening via hash links (#/wip/1) and intercept same-page links
+      function routeFromHash(){
+        const h = location.hash || '';
+        const m = h.match(/^#\/wip\/(\d+)/);
+        if(m){ openOverlay(m[1]); }
+      }
+      window.addEventListener('hashchange', routeFromHash);
+      // intercept anchor clicks that point to internal wip links
+      document.addEventListener('click', (ev)=>{
+        const a = ev.target.closest && ev.target.closest('a');
+        if(!a) return;
+        const href = a.getAttribute('href') || '';
+        const m = href.match(/^#\/wip\/(\d+)/);
+        if(m){ ev.preventDefault(); openOverlay(m[1]); }
+      });
+      // init from hash if present
+      routeFromHash();
+
+      // close handlers
+      document.querySelectorAll('[data-close]').forEach(n=>n.addEventListener('click', closeOverlay));
+      window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeOverlay(); });
+    })();
+
+    // pointer-driven motion: parallax blobs and tile tilt
+    (function(){
+      if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const root = document.documentElement;
+      let tx = 0, ty = 0, cx = 0, cy = 0;
+      const ease = 0.08;
+
+      function onPointerMove(e){
+        const x = (e.clientX != null) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || window.innerWidth/2;
+        const y = (e.clientY != null) ? e.clientY : (e.touches && e.touches[0] && e.touches[0].clientY) || window.innerHeight/2;
+        const nx = (x - window.innerWidth/2) / (window.innerWidth/2); // -1..1
+        const ny = (y - window.innerHeight/2) / (window.innerHeight/2);
+        tx = nx * 28; ty = ny * 28; // target motion values
+        cx = x; cy = y;
+      }
+
+      // tile tilt: update per tile on pointermove
+      function updateTiles(){
+        // smooth CSS vars
+        const curX = parseFloat(getComputedStyle(root).getPropertyValue('--mx')) || 0;
+        const curY = parseFloat(getComputedStyle(root).getPropertyValue('--my')) || 0;
+        const nx = curX + (tx - curX) * ease;
+        const ny = curY + (ty - curY) * ease;
+        root.style.setProperty('--mx', nx.toFixed(3));
+        root.style.setProperty('--my', ny.toFixed(3));
+
+        // tilt tiles
+        document.querySelectorAll('.tile').forEach(tile=>{
+          const rect = tile.getBoundingClientRect();
+          const rx = (cx - (rect.left + rect.width/2)) / (rect.width/2); // -1..1
+          const ry = (cy - (rect.top + rect.height/2)) / (rect.height/2);
+          const rotY = rx * 6; const rotX = -ry * 6;
+          const depth = 8 + Math.min(12, Math.hypot(nx,ny)*0.6);
+          tile.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(${depth}px)`;
+        });
+
+        requestAnimationFrame(updateTiles);
+      }
+
+      // reset transforms on leave
+      document.querySelectorAll('.tile').forEach(tile=>{
+        tile.addEventListener('pointerenter', ()=>{ tile.style.transition = 'transform .14s cubic-bezier(.2,.9,.2,1)'; });
+        tile.addEventListener('pointerleave', ()=>{ tile.style.transition = 'transform .28s ease'; tile.style.transform = ''; });
+      });
+
+      // pointer events
+      window.addEventListener('pointermove', onPointerMove, {passive:true});
+      // device orientation for mobile
+      if(window.DeviceOrientationEvent){
+        window.addEventListener('deviceorientation', (ev)=>{
+          if(ev.gamma==null) return;
+          // gamma: left-right, beta: front-back
+          tx = (ev.gamma/90) * 24; ty = (ev.beta/90) * 24;
+        });
+      }
+
+      updateTiles();
+    })();
+  </script>
+</body>
+</html>
