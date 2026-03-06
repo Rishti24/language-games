@@ -34,6 +34,13 @@
     .door .handle{width:72px;height:14px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px}
     .fridge.open .door{transform:translateX(-120%);opacity:0}
     .fridge.closed .light{opacity:0.12}
+    .door.dragging{transition:none}
+
+    /* Dragged item styling */
+    .item.dragging{position:fixed;pointer-events:none;transform:translate(-50%,-50%) scale(1.04);z-index:999;box-shadow:0 32px 80px rgba(0,0,0,0.75)}
+
+    /* small hover hint */
+    .hint{position:fixed;padding:6px 8px;background:rgba(0,0,0,0.7);color:var(--text);font-size:12px;border-radius:6px;pointer-events:none;opacity:0;transition:opacity .16s ease,transform .16s ease}
 
     .shelf{height:92px;display:flex;align-items:center;gap:14px;padding:8px;border-top:1px solid var(--glass);border-bottom:1px solid rgba(255,255,255,0.02)}
     .shelf.top{height:76px}
@@ -194,10 +201,115 @@
       freeBtn.addEventListener('click',handleFree);
       freeInput.addEventListener('keydown',e=>{ if(e.key==='Enter'){ handleFree(); } });
 
+      // click / keyboard selection
       itemsEl.forEach(el=>{
         el.addEventListener('click',()=>handleSelect(el));
         el.addEventListener('keydown',(e)=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); handleSelect(el);} });
+
+        // hover-timer hint
+        let hoverTimer = null;
+        el.addEventListener('mouseenter', (ev)=>{
+          hoverTimer = setTimeout(()=>{
+            showHint(ev.clientX, ev.clientY, 'Still deciding?');
+          }, 900);
+        });
+        el.addEventListener('mousemove', (ev)=>{
+          // keep hint near pointer if visible
+          moveHint(ev.clientX, ev.clientY);
+        });
+        el.addEventListener('mouseleave', ()=>{
+          clearTimeout(hoverTimer); hideHint();
+        });
+
+        // pointer-based dragging to take item
+        el.addEventListener('pointerdown', startDrag);
       });
+
+      // door drag to open
+      const door = document.getElementById('door');
+      let doorDragging = false, doorStartX = 0, doorCurX = 0;
+      function startDoorDrag(e){
+        door.setPointerCapture(e.pointerId);
+        doorDragging = true; doorStartX = e.clientX; door.classList.add('dragging');
+      }
+      function moveDoorDrag(e){
+        if(!doorDragging) return;
+        doorCurX = e.clientX - doorStartX; // negative to open left
+        // clamp
+        if(doorCurX < -window.innerWidth) doorCurX = -window.innerWidth;
+        door.style.transform = `translateX(${doorCurX}px)`;
+      }
+      function endDoorDrag(e){
+        if(!doorDragging) return;
+        doorDragging = false; door.releasePointerCapture(e.pointerId); door.classList.remove('dragging');
+        // open threshold
+        if(doorCurX < -120){ fridge.classList.add('open'); door.style.transform='translateX(-120%)'; }
+        else { door.style.transform='translateX(0)'; }
+      }
+      door.addEventListener('pointerdown', startDoorDrag);
+      window.addEventListener('pointermove', moveDoorDrag);
+      window.addEventListener('pointerup', endDoorDrag);
+
+      // Dragging logic for items
+      let draggingEl = null; let dragId=null;
+      function startDrag(e){
+        e.preventDefault();
+        draggingEl = e.currentTarget; dragId = draggingEl.dataset.id;
+        draggingEl.setPointerCapture(e.pointerId);
+        draggingEl.classList.add('dragging');
+        moveDragged(e.clientX, e.clientY);
+        window.addEventListener('pointermove', dragMove);
+        window.addEventListener('pointerup', dragEnd);
+      }
+      function dragMove(e){ if(!draggingEl) return; moveDragged(e.clientX,e.clientY); }
+      function moveDragged(x,y){
+        draggingEl.style.left = x + 'px'; draggingEl.style.top = y + 'px';
+      }
+      function dragEnd(e){
+        if(!draggingEl) return;
+        // determine if released outside interior (taken)
+        const interior = document.querySelector('.interior').getBoundingClientRect();
+        const releasedOutside = e.clientX < interior.left || e.clientX > interior.right || e.clientY < interior.top - 20 || e.clientY > interior.bottom + 20;
+        if(releasedOutside){
+          // animate outward and register take
+          takeItem(draggingEl);
+        } else {
+          // snap back
+          draggingEl.classList.remove('dragging');
+          draggingEl.style.left=''; draggingEl.style.top='';
+        }
+        try{ draggingEl.releasePointerCapture(e.pointerId);}catch(e){}
+        window.removeEventListener('pointermove', dragMove);
+        window.removeEventListener('pointerup', dragEnd);
+        draggingEl = null; dragId=null;
+      }
+
+      // hint UI
+      const hint = document.createElement('div'); hint.className='hint'; document.body.appendChild(hint);
+      function showHint(x,y,msg){ hint.textContent=msg; hint.style.left=(x+14)+'px'; hint.style.top=(y+14)+'px'; hint.style.opacity=1; hint.style.transform='translateY(0)'; }
+      function moveHint(x,y){ if(hint) { hint.style.left=(x+14)+'px'; hint.style.top=(y+14)+'px'; } }
+      function hideHint(){ if(hint) { hint.style.opacity=0; } }
+
+      function takeItem(el){
+        // visual: move forward then fade then reset
+        el.style.transition='transform .28s ease,opacity .36s ease,left .2s ease,top .2s ease';
+        el.style.transform='translate(-50%,-50%) scale(1.08) translateX(-160px)';
+        el.style.opacity='0.06';
+        // register as taken
+        const id = el.dataset.id;
+        const key = id==='leftovers'?'leftovers':id;
+        counts[key] = (counts[key]||0)+1; updateCountsUI();
+        // responses
+        const o = observations[id] ? pick(observations[id]) : pick(genericObservations);
+        const p = predictions[id] ? pick(predictions[id]) : pick(genericPredictions);
+        obs.textContent = o; pred.textContent = p; response.classList.add('visible');
+        fridge.classList.add('lit'); setTimeout(()=>fridge.classList.remove('lit'),900);
+        // restore after delay
+        setTimeout(()=>{
+          el.style.transition='transform .38s cubic-bezier(.2,.9,.19,1),opacity .28s ease,left .2s ease,top .2s ease';
+          el.style.transform=''; el.style.opacity='1'; el.classList.remove('dragging'); el.style.left=''; el.style.top='';
+        },800);
+      }
 
       // initial UI
       updateCountsUI();
